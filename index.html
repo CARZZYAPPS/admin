@@ -479,6 +479,10 @@
       return ["email", "emailaddress", "email_address"].includes(key.toLowerCase());
     }
 
+    function mailtoHref(email) {
+      return `mailto:${encodeURIComponent(email).replace(/%40/gi, "@")}`;
+    }
+
     function submissionDate(data) {
       const value = data.createdAt ?? data.timestamp ?? data.submittedAt ?? data.date ?? data.created_at;
       if (value?.toDate instanceof Function) return value.toDate();
@@ -579,7 +583,7 @@
         const initials = name.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("") || "?";
         const details = escapeHtml(JSON.stringify({ id, data }));
         return `<tr>
-          <td class="name-cell"><div class="submitter"><div class="submitter-avatar">${escapeHtml(initials)}</div><div style="min-width:0"><div class="submitter-name">${escapeHtml(name)}</div><div class="submitter-email">${email ? `<a class="email-link" href="mailto:${encodeURIComponent(email)}">${escapeHtml(email)}</a>` : escapeHtml(id)}</div></div></div></td>
+          <td class="name-cell"><div class="submitter"><div class="submitter-avatar">${escapeHtml(initials)}</div><div style="min-width:0"><div class="submitter-name">${escapeHtml(name)}</div><div class="submitter-email">${email ? `<a class="email-link" href="${escapeHtml(mailtoHref(email))}">${escapeHtml(email)}</a>` : escapeHtml(id)}</div></div></div></td>
           ${currentTab.kind === "feedback" ? `<td><span class="rating-value" aria-label="${escapeHtml(rating || "No")} out of 5">${escapeHtml(rating || "—")} / 5</span></td>` : ""}
           <td style="max-width:230px"><span title="${escapeHtml(message)}">${escapeHtml(message ? (message.length > 64 ? `${message.slice(0, 64)}…` : message) : "—")}</span></td>
           <td style="white-space:nowrap">${escapeHtml(formatDateTime(date))}</td>
@@ -609,7 +613,7 @@
         if (isEmailField(key) && text) {
           const link = document.createElement("a");
           link.className = "email-link";
-          link.href = `mailto:${encodeURIComponent(text)}`;
+          link.href = mailtoHref(text);
           link.textContent = text;
           content.append(link);
         } else {
