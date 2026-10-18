@@ -82,6 +82,14 @@
     h1, h2, p { margin-top: 0; }
     h1 { font: 700 28px Manrope, sans-serif; letter-spacing: -.9px; margin: 7px 0 6px; }
     .subtitle { color: var(--muted); font-size: 13px; margin: 0; }
+    .tabs-row { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+    .tabs { min-width: 0; flex: 1; display: flex; gap: 5px; overflow-x: auto; scrollbar-width: thin; }
+    .tab-button { flex: 0 0 auto; padding: 9px 13px; border: 1px solid transparent; border-radius: 8px; color: #9da8a3; background: transparent; font-size: 11px; font-weight: 600; cursor: pointer; }
+    .tab-button:hover { color: #e4ebe7; background: #131917; }
+    .tab-button[aria-selected="true"] { border-color: #263a35; color: var(--teal); background: var(--teal-dim); }
+    .add-tab-button { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 7px; padding: 8px 11px; border: 1px dashed #35413d; border-radius: 8px; color: #b2bdb7; background: transparent; font-size: 11px; font-weight: 600; cursor: pointer; }
+    .add-tab-button:hover { border-color: var(--teal); color: var(--teal); }
+    .add-tab-button svg { width: 14px; height: 14px; }
     .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 23px; }
     .stat-card { min-height: 108px; padding: 18px 20px; border: 1px solid var(--line); border-radius: 11px; background: var(--surface); }
     .stat-label { display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-size: 11px; }
@@ -111,6 +119,8 @@
     .submitter-avatar { width: 29px; height: 29px; flex: 0 0 29px; display: grid; place-items: center; border-radius: 8px; background: #1b2825; color: #78dccc; font-size: 10px; font-weight: 700; text-transform: uppercase; }
     .submitter-name { overflow: hidden; max-width: 175px; color: #e1e7e4; font-size: 11px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
     .submitter-email { overflow: hidden; max-width: 180px; color: #818c87; font-size: 10px; margin-top: 3px; text-overflow: ellipsis; white-space: nowrap; }
+    .email-link { color: inherit; text-decoration: none; }
+    .email-link:hover { color: var(--teal); text-decoration: underline; text-underline-offset: 2px; }
     .type-pill { display: inline-block; max-width: 150px; overflow: hidden; padding: 5px 8px; border: 1px solid #293330; border-radius: 6px; color: #aebbb5; background: #171e1c; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
     .rating-value { color: #9ce9dc; font-size: 11px; font-weight: 700; white-space: nowrap; }
     .row-button { border: 0; background: transparent; color: var(--teal); font-size: 10px; font-weight: 600; cursor: pointer; white-space: nowrap; }
@@ -150,6 +160,7 @@
     .detail-field:last-child { border-bottom: 0; }
     .detail-key { color: #7e8984; font-size: 9px; font-weight: 700; letter-spacing: .75px; text-transform: uppercase; margin-bottom: 6px; }
     .detail-value { color: #dce3df; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; white-space: pre-wrap; }
+    .form-hint { color: var(--muted); font-size: 10px; line-height: 1.6; margin: 3px 0 15px; }
     .spinner { width: 15px; height: 15px; border: 2px solid #42504a; border-top-color: var(--teal); border-radius: 50%; animation: spin .7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
     @media (max-width: 850px) {
@@ -173,6 +184,9 @@
       .content { padding: 24px 16px 38px; }
       .page-heading { align-items: flex-start; flex-direction: column; }
       h1 { font-size: 25px; }
+      .tabs-row { align-items: stretch; flex-direction: column; }
+      .tabs { flex: initial; }
+      .add-tab-button { align-self: flex-start; }
       .stats { grid-template-columns: 1fr; gap: 8px; }
       .stat-card { min-height: 87px; }
       .stat-value { font-size: 22px; margin-top: 5px; }
@@ -256,14 +270,21 @@
         <section class="page-heading">
           <div>
             <div class="eyebrow">Inbox</div>
-            <h1>Form submissions</h1>
-            <p class="subtitle">A clear view of every message sent through your forms.</p>
+            <h1 id="page-title">Feedback</h1>
+            <p id="page-subtitle" class="subtitle">Feedback submitted through the Carzzy Apps feedback form.</p>
           </div>
           <button id="refresh-label" class="text-button" type="button">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9A7 7 0 0 1 17.5 6L20 12M4 12l2.5 6A7 7 0 0 0 18.4 15"/></svg>
             Refresh
           </button>
         </section>
+        <div class="tabs-row">
+          <div id="tabs" class="tabs" role="tablist" aria-label="Submission collections"></div>
+          <button id="add-tab-button" class="add-tab-button" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            Add more tabs
+          </button>
+        </div>
         <section class="stats" aria-label="Submission statistics">
           <div class="stat-card">
             <div class="stat-label">Total submissions <span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 5h16v14H4zM4 7l8 6 8-6"/></svg></span></div>
@@ -280,7 +301,7 @@
         </section>
         <section class="panel" aria-label="Submissions list">
           <div class="panel-heading">
-            <div><h2 class="panel-title">All submissions</h2><p class="panel-description">Browse up to 100 submissions and open one to view its full details.</p></div>
+            <div><h2 id="all-submissions-title" class="panel-title">All Feedback</h2><p class="panel-description">Browse up to 100 records and open one to view its full details.</p></div>
             <div class="toolbar">
               <label class="search-wrap">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg>
@@ -290,7 +311,7 @@
           </div>
           <div id="table-container" class="table-scroll">
             <table>
-              <thead><tr><th>Contact</th><th>Rating</th><th>Feedback</th><th>Received</th><th></th></tr></thead>
+              <thead><tr><th>Contact</th><th id="rating-heading">Rating</th><th id="message-heading">Details</th><th>Received</th><th></th></tr></thead>
               <tbody id="submission-rows"></tbody>
             </table>
           </div>
@@ -319,6 +340,33 @@
     </section>
   </div>
 
+  <div id="add-tab-backdrop" class="modal-backdrop hidden" role="presentation">
+    <form id="add-tab-form" class="detail-modal" role="dialog" aria-modal="true" aria-labelledby="add-tab-title">
+      <div class="modal-head">
+        <div><h2 id="add-tab-title">Add a submissions tab</h2><p>Connect another top-level Firestore collection.</p></div>
+        <button id="close-add-tab" class="icon-button" type="button" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m18 6-12 12M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label for="new-tab-name">Tab name</label>
+          <input id="new-tab-name" type="text" maxlength="30" placeholder="e.g. Support requests" required>
+        </div>
+        <div class="field">
+          <label for="new-tab-collection">Firestore collection ID</label>
+          <input id="new-tab-collection" type="text" maxlength="128" pattern="[A-Za-z0-9_-]+" placeholder="e.g. supportRequests" required>
+        </div>
+        <p class="form-hint">The collection must allow reads for signed-in users in your Firestore rules. Added tabs are saved only in this browser.</p>
+        <p id="add-tab-error" class="login-error hidden" role="alert"></p>
+        <div style="display:flex;justify-content:flex-end;gap:9px;margin-top:18px">
+          <button id="cancel-add-tab" class="text-button" type="button">Cancel</button>
+          <button class="text-button" type="submit">Add tab</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
     import {
@@ -337,7 +385,11 @@
       appId: "1:32843716300:web:52b3617aa1e05a0c4c9469",
       measurementId: "G-PQXJ25LD54"
     };
-    const COLLECTION_NAME = "feedbackSubmissions";
+    const DEFAULT_TABS = [
+      { id: "feedback", label: "Feedback", collection: "feedbackSubmissions", kind: "feedback" },
+      { id: "contact-form", label: "Contact Form", collection: "contactSubmissions", kind: "contact" }
+    ];
+    const CUSTOM_TABS_STORAGE_KEY = "carzzyapps-admin-custom-tabs";
 
     const $ = (id) => document.getElementById(id);
     const loginScreen = $("login-screen");
@@ -349,9 +401,59 @@
     const emptyState = $("empty-state");
     const tableContainer = $("table-container");
     const searchInput = $("search");
+    const setupNotice = $("setup-notice");
+    let tabs = [...DEFAULT_TABS];
+    let currentTab = DEFAULT_TABS[0];
+    let loadSequence = 0;
     let auth;
     let db;
     let submissions = [];
+
+    function showSetupNotice(message) {
+      setupNotice.textContent = message;
+      setupNotice.classList.remove("hidden");
+    }
+
+    function loadCustomTabs() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(CUSTOM_TABS_STORAGE_KEY) || "[]");
+        if (!Array.isArray(saved)) throw new TypeError("Saved tab list is not an array.");
+        const knownCollections = new Set(DEFAULT_TABS.map((tab) => tab.collection));
+        return saved.filter((tab) => {
+          const valid = tab
+            && typeof tab.label === "string"
+            && tab.label.trim().length > 0
+            && typeof tab.collection === "string"
+            && /^[A-Za-z0-9_-]{1,128}$/.test(tab.collection)
+            && !knownCollections.has(tab.collection);
+          if (valid) knownCollections.add(tab.collection);
+          return valid;
+        }).map((tab) => ({
+          id: `custom-${tab.collection}`,
+          label: tab.label.trim().slice(0, 30),
+          collection: tab.collection,
+          kind: "custom"
+        }));
+      } catch (error) {
+        console.error("Unable to load saved submission tabs.", error);
+        showSetupNotice("Saved custom tabs could not be loaded in this browser.");
+        return [];
+      }
+    }
+
+    function saveCustomTabs() {
+      try {
+        localStorage.setItem(CUSTOM_TABS_STORAGE_KEY, JSON.stringify(
+          tabs.filter((tab) => tab.kind === "custom").map(({ label, collection }) => ({ label, collection }))
+        ));
+        return true;
+      } catch (error) {
+        console.error("Unable to save custom submission tabs.", error);
+        showSetupNotice("This tab was added for this session, but could not be saved in this browser.");
+        return false;
+      }
+    }
+    tabs = [...DEFAULT_TABS, ...loadCustomTabs()];
 
     function escapeHtml(value) {
       return String(value).replace(/[&<>"']/g, (char) => ({
@@ -371,6 +473,10 @@
         targetNames.includes(key.toLowerCase()) && value != null && typeof value !== "object"
       );
       return entry ? displayValue(entry[1]) : "";
+    }
+
+    function isEmailField(key) {
+      return ["email", "emailaddress", "email_address"].includes(key.toLowerCase());
     }
 
     function submissionDate(data) {
@@ -406,6 +512,42 @@
       $("latest-date").textContent = latest ? formatDate(latest) : "—";
     }
 
+    function renderTabs() {
+      const container = $("tabs");
+      container.replaceChildren();
+      for (const tab of tabs) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "tab-button";
+        button.id = `tab-${tab.id}`;
+        button.dataset.tabId = tab.id;
+        button.setAttribute("role", "tab");
+        button.setAttribute("aria-selected", String(tab.id === currentTab.id));
+        button.tabIndex = tab.id === currentTab.id ? 0 : -1;
+        button.textContent = tab.label;
+        container.append(button);
+      }
+    }
+
+    function selectTab(tab) {
+      currentTab = tab;
+      searchInput.value = "";
+      submissions = [];
+      $("page-title").textContent = tab.label;
+      $("page-subtitle").textContent = tab.kind === "feedback"
+        ? "Feedback submitted through the Carzzy Apps feedback form."
+        : tab.kind === "contact"
+          ? "Messages submitted through the Carzzy Apps contact form."
+          : `Records from the ${tab.collection} collection.`;
+      $("all-submissions-title").textContent = `All ${tab.label}`;
+      $("message-heading").textContent = tab.kind === "feedback" ? "Feedback" : tab.kind === "contact" ? "Message" : "Details";
+      $("rating-heading").classList.toggle("hidden", tab.kind !== "feedback");
+      renderTabs();
+      renderStats(submissions);
+      renderRows();
+      loadSubmissions();
+    }
+
     function renderRows() {
       const term = searchInput.value.trim().toLowerCase();
       const filtered = submissions.filter(({ id, data }) =>
@@ -421,7 +563,7 @@
         $("empty-title").textContent = term ? "No matching submissions" : "Your inbox is clear";
         $("empty-copy").textContent = term
           ? "Try another name, email, subject, or keyword."
-          : "New form submissions will appear here as soon as they arrive.";
+          : `New ${currentTab.label.toLowerCase()} will appear here as soon as they arrive.`;
         rows.replaceChildren();
         return;
       }
@@ -431,14 +573,14 @@
       rows.innerHTML = filtered.map(({ id, data }) => {
         const name = findField(data, ["username"]) || "Unknown";
         const email = findField(data, ["email", "emailAddress", "email_address"]);
-        const message = findField(data, ["reason"]);
+        const message = findField(data, ["reason", "comments", "message", "description", "body"]);
         const rating = findField(data, ["rating"]);
         const date = submissionDate(data);
         const initials = name.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("") || "?";
         const details = escapeHtml(JSON.stringify({ id, data }));
         return `<tr>
-          <td class="name-cell"><div class="submitter"><div class="submitter-avatar">${escapeHtml(initials)}</div><div style="min-width:0"><div class="submitter-name">${escapeHtml(name)}</div><div class="submitter-email">${escapeHtml(email || id)}</div></div></div></td>
-          <td><span class="rating-value" aria-label="${escapeHtml(rating || "No")} out of 5">${escapeHtml(rating || "—")} / 5</span></td>
+          <td class="name-cell"><div class="submitter"><div class="submitter-avatar">${escapeHtml(initials)}</div><div style="min-width:0"><div class="submitter-name">${escapeHtml(name)}</div><div class="submitter-email">${email ? `<a class="email-link" href="mailto:${encodeURIComponent(email)}">${escapeHtml(email)}</a>` : escapeHtml(id)}</div></div></div></td>
+          ${currentTab.kind === "feedback" ? `<td><span class="rating-value" aria-label="${escapeHtml(rating || "No")} out of 5">${escapeHtml(rating || "—")} / 5</span></td>` : ""}
           <td style="max-width:230px"><span title="${escapeHtml(message)}">${escapeHtml(message ? (message.length > 64 ? `${message.slice(0, 64)}…` : message) : "—")}</span></td>
           <td style="white-space:nowrap">${escapeHtml(formatDateTime(date))}</td>
           <td><button class="row-button" type="button" data-submission="${details}">View</button></td>
@@ -448,7 +590,7 @@
 
     function showDetails(submission) {
       const { id, data } = submission;
-      $("modal-title").textContent = findField(data, ["name", "fullName", "full_name"]) || "Submission details";
+      $("modal-title").textContent = findField(data, ["username", "name", "fullName", "full_name"]) || "Submission details";
       $("modal-subtitle").textContent = `Received ${formatDateTime(submissionDate(data))} · ID ${id}`;
       $("modal-body").replaceChildren();
       for (const [key, value] of Object.entries(data)) {
@@ -459,11 +601,20 @@
         label.textContent = key;
         const content = document.createElement("div");
         content.className = "detail-value";
-        content.textContent = value?.toDate instanceof Function
+        const text = value?.toDate instanceof Function
           ? formatDateTime(value.toDate())
           : value?.seconds != null
             ? formatDateTime(new Date(value.seconds * 1000))
             : displayValue(value);
+        if (isEmailField(key) && text) {
+          const link = document.createElement("a");
+          link.className = "email-link";
+          link.href = `mailto:${encodeURIComponent(text)}`;
+          link.textContent = text;
+          content.append(link);
+        } else {
+          content.textContent = text;
+        }
         field.append(label, content);
         $("modal-body").append(field);
       }
@@ -478,14 +629,16 @@
     }
 
     async function loadSubmissions() {
+      const sequence = ++loadSequence;
+      const tab = currentTab;
       $("load-error").classList.add("hidden");
       $("result-count").innerHTML = '<span class="spinner" aria-label="Loading"></span>';
       try {
-        const snapshot = await getDocs(query(
-          collection(db, COLLECTION_NAME),
-          orderBy("createdAt", "desc"),
-          limit(100)
-        ));
+        const submissionsQuery = tab.kind === "custom"
+          ? query(collection(db, tab.collection), limit(100))
+          : query(collection(db, tab.collection), orderBy("createdAt", "desc"), limit(100));
+        const snapshot = await getDocs(submissionsQuery);
+        if (sequence !== loadSequence) return;
         submissions = snapshot.docs.map((document) => ({ id: document.id, data: document.data() }));
         submissions.sort((a, b) =>
           (submissionDate(b.data)?.getTime() ?? 0) - (submissionDate(a.data)?.getTime() ?? 0)
@@ -494,9 +647,12 @@
         renderRows();
       } catch (error) {
         console.error("Unable to load form submissions.", error);
-        $("load-error").textContent = "Could not load submissions. Check your Firestore rules, collection name, and Firebase configuration, then try refreshing.";
+        if (sequence !== loadSequence) return;
+        $("load-error").textContent = error.code === "permission-denied"
+          ? `Firestore rules do not allow this signed-in account to read ${tab.collection}.`
+          : `Could not load ${tab.label}. Check the collection and Firestore rules, then try refreshing.`;
         $("load-error").classList.remove("hidden");
-        $("result-count").textContent = "Submissions could not be loaded";
+        $("result-count").textContent = `${tab.label} could not be loaded`;
       }
     }
 
@@ -512,7 +668,7 @@
       appShell.classList.remove("hidden");
       $("user-email").textContent = user.email || "Administrator";
       $("user-avatar").textContent = (user.email || "A").slice(0, 1).toUpperCase();
-      loadSubmissions();
+      selectTab(currentTab);
     }
 
     loginForm.addEventListener("submit", async (event) => {
@@ -544,6 +700,63 @@
     $("refresh").addEventListener("click", loadSubmissions);
     $("refresh-label").addEventListener("click", loadSubmissions);
     searchInput.addEventListener("input", renderRows);
+    $("tabs").addEventListener("click", (event) => {
+      const button = event.target.closest("[data-tab-id]");
+      const selected = tabs.find((tab) => tab.id === button?.dataset.tabId);
+      if (selected && selected.id !== currentTab.id) selectTab(selected);
+    });
+    $("tabs").addEventListener("keydown", (event) => {
+      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+      const buttons = [...$("tabs").querySelectorAll("[role=tab]")];
+      const index = buttons.indexOf(document.activeElement);
+      if (index < 0) return;
+      event.preventDefault();
+      const nextIndex = event.key === "Home" ? 0
+        : event.key === "End" ? buttons.length - 1
+          : (index + (event.key === "ArrowRight" ? 1 : -1) + buttons.length) % buttons.length;
+      buttons[nextIndex].focus();
+      buttons[nextIndex].click();
+    });
+    $("add-tab-button").addEventListener("click", () => {
+      $("add-tab-error").classList.add("hidden");
+      $("add-tab-form").reset();
+      $("add-tab-backdrop").classList.remove("hidden");
+      $("new-tab-name").focus();
+    });
+    $("add-tab-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const label = $("new-tab-name").value.trim();
+      const collectionId = $("new-tab-collection").value.trim();
+      const error = $("add-tab-error");
+      if (!label || !collectionId || !/^[A-Za-z0-9_-]{1,128}$/.test(collectionId)) {
+        error.textContent = "Enter a tab name and a valid top-level Firestore collection ID.";
+        error.classList.remove("hidden");
+        return;
+      }
+      if (tabs.some((tab) =>
+        tab.collection.toLowerCase() === collectionId.toLowerCase()
+        || tab.label.toLowerCase() === label.toLowerCase()
+      )) {
+        error.textContent = "A tab with that name or collection already exists.";
+        error.classList.remove("hidden");
+        return;
+      }
+      const tab = {
+        id: `custom-${collectionId}`,
+        label: label.slice(0, 30),
+        collection: collectionId,
+        kind: "custom"
+      };
+      tabs.push(tab);
+      saveCustomTabs();
+      $("add-tab-backdrop").classList.add("hidden");
+      selectTab(tab);
+    });
+    $("close-add-tab").addEventListener("click", () => $("add-tab-backdrop").classList.add("hidden"));
+    $("cancel-add-tab").addEventListener("click", () => $("add-tab-backdrop").classList.add("hidden"));
+    $("add-tab-backdrop").addEventListener("click", (event) => {
+      if (event.target === $("add-tab-backdrop")) $("add-tab-backdrop").classList.add("hidden");
+    });
     rows.addEventListener("click", (event) => {
       const button = event.target.closest("[data-submission]");
       if (!button) return;
@@ -562,6 +775,7 @@
     });
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") $("detail-backdrop").classList.add("hidden");
+      if (event.key === "Escape") $("add-tab-backdrop").classList.add("hidden");
     });
 
     try {
