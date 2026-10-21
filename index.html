@@ -575,9 +575,9 @@
       tableContainer.classList.remove("hidden");
       emptyState.classList.add("hidden");
       rows.innerHTML = filtered.map(({ id, data }) => {
-        const name = findField(data, ["username"]) || "Unknown";
+        const name = findField(data, ["username", "name", "fullName", "full_name"]) || "Unknown";
         const email = findField(data, ["email", "emailAddress", "email_address"]);
-        const message = findField(data, ["reason", "comments", "message", "description", "body"]);
+        const message = findField(data, ["reason", "comments", "message", "description", "body", "inquiry"]);
         const rating = findField(data, ["rating"]);
         const date = submissionDate(data);
         const initials = name.split(/\s+/).slice(0, 2).map((part) => part[0] || "").join("") || "?";
@@ -638,9 +638,9 @@
       $("load-error").classList.add("hidden");
       $("result-count").innerHTML = '<span class="spinner" aria-label="Loading"></span>';
       try {
-        const submissionsQuery = tab.kind === "custom"
-          ? query(collection(db, tab.collection), limit(100))
-          : query(collection(db, tab.collection), orderBy("createdAt", "desc"), limit(100));
+        const submissionsQuery = tab.kind === "feedback"
+          ? query(collection(db, tab.collection), orderBy("createdAt", "desc"), limit(100))
+          : query(collection(db, tab.collection), limit(100));
         const snapshot = await getDocs(submissionsQuery);
         if (sequence !== loadSequence) return;
         submissions = snapshot.docs.map((document) => ({ id: document.id, data: document.data() }));
