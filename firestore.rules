@@ -1,0 +1,80 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /feedbackSubmissions/{submissionId} {
+      allow create: if request.resource.data.keys().hasOnly([
+        'username', 'email', 'rating', 'reason', 'createdAt'
+      ])
+      && request.resource.data.username is string
+      && request.resource.data.username.size() > 0
+      && request.resource.data.username.size() <= 100
+      && request.resource.data.email is string
+      && request.resource.data.email.size() > 3
+      && request.resource.data.email.size() <= 254
+      && request.resource.data.rating is int
+      && request.resource.data.rating >= 1
+      && request.resource.data.rating <= 5
+      && request.resource.data.reason is string
+      && request.resource.data.reason.size() <= 5000
+      && request.resource.data.createdAt == request.time;
+
+      allow read: if request.auth != null;
+      allow update, delete: if false;
+    }
+
+    match /contactSubmissions/{submissionId} {
+      allow create: if request.resource.data.keys().hasOnly([
+        'username', 'email', 'comments', 'createdAt'
+      ])
+      && request.resource.data.username is string
+      && request.resource.data.username.size() > 0
+      && request.resource.data.username.size() <= 100
+      && request.resource.data.email is string
+      && request.resource.data.email.size() > 3
+      && request.resource.data.email.size() <= 254
+      && request.resource.data.comments is string
+      && request.resource.data.comments.size() > 0
+      && request.resource.data.comments.size() <= 5000
+      && request.resource.data.createdAt is timestamp;
+
+      allow read: if request.auth != null;
+      allow update, delete: if false;
+    }
+
+    match /launchCountdowns/{countdownId} {
+      function validLaunchCountdown(data) {
+        return data.keys().hasOnly([
+          'title', 'category', 'targetAt', 'subtitle', 'description',
+          'accent', 'status', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasAll([
+          'title', 'category', 'targetAt', 'subtitle', 'description',
+          'accent', 'status', 'createdAt', 'updatedAt'
+        ])
+        && data.title is string
+        && data.title.size() > 0
+        && data.title.size() <= 80
+        && data.category in ['New game', 'Game update', 'New feature', 'Announcement']
+        && data.targetAt is timestamp
+        && data.subtitle is string
+        && data.subtitle.size() <= 120
+        && data.description is string
+        && data.description.size() <= 400
+        && data.accent in ['teal', 'blue', 'violet', 'amber']
+        && data.status in ['draft', 'published']
+        && data.createdAt is timestamp
+        && data.updatedAt == request.time;
+      }
+
+      allow read: if request.auth != null || resource.data.status == 'published';
+      allow create: if request.auth != null
+        && validLaunchCountdown(request.resource.data)
+        && request.resource.data.createdAt == request.time;
+      allow update: if request.auth != null
+        && validLaunchCountdown(request.resource.data)
+        && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if request.auth != null;
+    }
+  }
+}

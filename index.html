@@ -5,25 +5,25 @@
   <meta charset="utf-8">
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Submissions | Carzzy Apps Admin</title>
+<title>Admin Workspace | Carzzy Apps</title>
 
-  <meta name="description" content="Private Carzzy Apps dashboard for reviewing contact form and feedback submissions.">
-  <meta name="keywords" content="Carzzy Apps admin, submissions dashboard, contact submissions, feedback">
+  <meta name="description" content="Private Carzzy Apps workspace for submissions and launch countdowns.">
+  <meta name="keywords" content="Carzzy Apps admin, submissions dashboard, launch countdowns">
   <meta name="author" content="Carzzy Apps">
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#0a0c0c">
   <meta name="color-scheme" content="dark">
   <meta name="application-name" content="Carzzy Apps Admin">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Submissions | Carzzy Apps Admin">
-  <meta name="twitter:description" content="Private Carzzy Apps dashboard for reviewing contact form and feedback submissions.">
+  <meta name="twitter:title" content="Admin Workspace | Carzzy Apps">
+  <meta name="twitter:description" content="Private Carzzy Apps workspace for submissions and launch countdowns.">
   <meta name="twitter:image" content="https://admin.carzzyapps.com/Carzzy%20Apps%20Logo.png">
   <meta name="twitter:image:alt" content="Carzzy Apps logo">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Carzzy Apps Admin">
   <meta property="og:locale" content="en_US">
-  <meta property="og:title" content="Submissions | Carzzy Apps Admin">
-  <meta property="og:description" content="Private Carzzy Apps dashboard for reviewing contact form and feedback submissions.">
+  <meta property="og:title" content="Admin Workspace | Carzzy Apps">
+  <meta property="og:description" content="Private Carzzy Apps workspace for submissions and launch countdowns.">
   <meta property="og:url" content="https://admin.carzzyapps.com/">
   <meta property="og:image" content="https://admin.carzzyapps.com/Carzzy%20Apps%20Logo.png">
   <meta property="og:image:alt" content="Carzzy Apps logo">
@@ -74,6 +74,8 @@
       display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 9px;
       color: #b5bfbb; font-size: 13px; font-weight: 600;
     }
+    .workspace-nav { display: grid; gap: 4px; }
+    button.nav-item { width: 100%; border: 0; background: transparent; text-align: left; cursor: pointer; }
     .nav-item.active { background: var(--teal-dim); color: var(--teal); }
     .nav-item svg { width: 17px; height: 17px; }
     .sidebar-bottom { margin-top: auto; }
@@ -186,6 +188,81 @@
     .detail-key { color: #7e8984; font-size: 9px; font-weight: 700; letter-spacing: .75px; text-transform: uppercase; margin-bottom: 6px; }
     .detail-value { color: #dce3df; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; white-space: pre-wrap; }
     .form-hint { color: var(--muted); font-size: 10px; line-height: 1.6; margin: 3px 0 15px; }
+    .workspace-view.hidden { display: none; }
+    .launch-hero {
+      position: relative; overflow: hidden; min-height: 214px; display: flex; align-items: flex-end;
+      padding: 30px; margin-bottom: 20px; border: 1px solid #253a35; border-radius: 14px;
+      background: radial-gradient(ellipse at 87% 12%, rgba(0,209,178,.15), transparent 38%), linear-gradient(120deg, #121b19, #101514 66%);
+    }
+    .launch-hero::after {
+      position: absolute; top: -70px; right: 7%; width: 240px; height: 240px; border: 1px solid rgba(0,209,178,.1);
+      border-radius: 50%; box-shadow: 0 0 0 25px rgba(0,209,178,.025), 0 0 0 52px rgba(0,209,178,.02); content: "";
+    }
+    .launch-hero-content { position: relative; z-index: 1; max-width: 590px; }
+    .launch-hero h2 { margin: 8px 0 7px; font: 700 clamp(23px, 3vw, 32px) Manrope, sans-serif; letter-spacing: -1px; }
+    .launch-hero p { max-width: 490px; margin: 0; color: #a4b0aa; font-size: 12px; line-height: 1.65; }
+    .launch-hero .eyebrow { display: flex; align-items: center; gap: 8px; }
+    .launch-hero .eyebrow::before { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 10px rgba(0,209,178,.65); content: ""; }
+    .launch-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 0 0 18px; }
+    .launch-toolbar h2 { margin: 0; font: 700 15px Manrope, sans-serif; }
+    .launch-toolbar p { margin: 4px 0 0; color: var(--muted); font-size: 11px; }
+    .launch-primary {
+      min-height: 39px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 14px;
+      border: 1px solid #13dfc0; border-radius: 8px; color: #07110f; background: var(--teal);
+      font-size: 11px; font-weight: 700; cursor: pointer; transition: filter .15s, transform .15s;
+    }
+    .launch-primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
+    .launch-primary:disabled { opacity: .58; cursor: wait; transform: none; }
+    .launch-primary svg { width: 15px; height: 15px; }
+    .launch-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .launch-stat { min-height: 82px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+    .launch-stat-label { color: var(--muted); font-size: 10px; }
+    .launch-stat-value { margin-top: 7px; font: 700 21px Manrope, sans-serif; letter-spacing: -.5px; }
+    .launch-filters { display: flex; gap: 6px; margin-bottom: 13px; }
+    .launch-filter { padding: 7px 10px; border: 1px solid transparent; border-radius: 7px; color: #94a19a; background: transparent; font-size: 10px; font-weight: 600; cursor: pointer; }
+    .launch-filter[aria-pressed="true"] { border-color: #263a35; color: var(--teal); background: var(--teal-dim); }
+    .launch-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
+    .launch-card { --launch-accent: var(--teal); overflow: hidden; border: 1px solid var(--line); border-radius: 11px; background: var(--surface); }
+    .launch-card-top { position: relative; min-height: 119px; padding: 17px 18px 14px; border-bottom: 1px solid #242d2a; background: radial-gradient(ellipse at 100% 0, color-mix(in srgb, var(--launch-accent) 15%, transparent), transparent 48%), #121716; }
+    .launch-card-topline { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .launch-category { color: var(--launch-accent); font-size: 9px; font-weight: 700; letter-spacing: 1.1px; text-transform: uppercase; }
+    .launch-status { padding: 4px 7px; border: 1px solid #39443f; border-radius: 5px; color: #aab4af; background: #19201e; font-size: 9px; font-weight: 600; }
+    .launch-status.published { border-color: rgba(0,209,178,.24); color: #76ddcb; background: rgba(0,209,178,.08); }
+    .launch-card h3 { margin: 18px 0 4px; font: 700 16px Manrope, sans-serif; letter-spacing: -.4px; overflow-wrap: anywhere; }
+    .launch-subtitle { margin: 0; color: #9aa59f; font-size: 10px; }
+    .launch-card-body { padding: 13px 18px 16px; }
+    .launch-countdown { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+    .launch-count-unit { min-width: 42px; padding: 6px 7px; border: 1px solid #242d2a; border-radius: 6px; text-align: center; background: #0c100f; }
+    .launch-count-unit strong { display: block; color: #e4ece8; font: 700 13px Manrope, sans-serif; }
+    .launch-count-unit span { display: block; margin-top: 2px; color: #78837d; font-size: 8px; text-transform: uppercase; }
+    .launch-date { color: #8e9993; font-size: 10px; }
+    .launch-card-actions { display: flex; flex-wrap: wrap; gap: 7px; padding-top: 12px; margin-top: 12px; border-top: 1px solid #222a27; }
+    .launch-action { min-height: 30px; padding: 0 9px; border: 1px solid #303a36; border-radius: 6px; color: #bac4bf; background: #151a18; font-size: 9px; font-weight: 600; cursor: pointer; }
+    .launch-action:hover { border-color: #52615b; color: #eff5f1; }
+    .launch-action.danger { color: #f29a96; }
+    .launch-empty { min-height: 200px; display: grid; place-items: center; padding: 30px; border: 1px dashed #303a36; border-radius: 11px; text-align: center; }
+    .launch-empty h3 { margin: 11px 0 5px; font: 700 13px Manrope, sans-serif; }
+    .launch-empty p { max-width: 340px; margin: 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
+    .launch-notice { margin-bottom: 14px; }
+    .launch-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 14px; }
+    .launch-form-grid .field.full { grid-column: 1 / -1; }
+    .launch-form-grid input, .launch-form-grid select, .launch-form-grid textarea {
+      width: 100%; min-height: 40px; padding: 9px 11px; border: 1px solid #303a36; border-radius: 7px;
+      outline: 0; color: var(--text); background: #0b0f0e; font-size: 11px;
+    }
+    .launch-form-grid textarea { min-height: 84px; resize: vertical; line-height: 1.5; }
+    .launch-form-grid input:focus, .launch-form-grid select:focus, .launch-form-grid textarea:focus { border-color: rgba(0,209,178,.65); }
+    .launch-form-grid input::placeholder, .launch-form-grid textarea::placeholder { color: #69736f; }
+    .launch-form-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 15px; margin-top: 5px; border-top: 1px solid var(--line); }
+    .launch-form-actions > div { display: flex; justify-content: flex-end; gap: 8px; }
+    .launch-form-message { min-height: 16px; margin: 10px 0 0; color: #ffaaa7; font-size: 10px; }
+    .launch-form-message.success { color: #81ddc9; }
+    .launch-preview { --launch-accent: var(--teal); padding: 14px 16px; border: 1px solid #2b3833; border-left: 3px solid var(--launch-accent); border-radius: 8px; background: #121816; }
+    .launch-preview-label { color: var(--launch-accent); font-size: 9px; font-weight: 700; letter-spacing: .9px; text-transform: uppercase; }
+    .launch-preview-title { margin: 7px 0 4px; font: 700 15px Manrope, sans-serif; }
+    .launch-preview-copy { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .launch-modal { width: min(100%, 700px); max-height: min(88vh, 790px); }
+    .launch-modal .modal-body { padding-bottom: 10px; }
     .spinner { width: 15px; height: 15px; border: 2px solid #42504a; border-top-color: var(--teal); border-radius: 50%; animation: spin .7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
     @media (max-width: 850px) {
@@ -198,11 +275,14 @@
       .panel-heading { align-items: flex-start; flex-direction: column; }
       .toolbar { width: 100%; }
       .search-wrap, .search-input { width: 100%; }
+      .launch-grid { grid-template-columns: 1fr; }
     }
     @media (max-width: 620px) {
       .sidebar { position: static; width: auto; height: auto; padding: 14px 18px; border-right: 0; border-bottom: 1px solid var(--line); }
       .brand { padding: 0; }
-      .nav-label, .nav-item, .sidebar-bottom { display: none; }
+      .nav-label, .sidebar-bottom { display: none; }
+      .workspace-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 13px; }
+      .nav-item { justify-content: center; padding: 9px 7px; font-size: 10px; }
       .main { margin-left: 0; }
       .topbar { height: 54px; padding: 0 18px; }
       .connection { display: none; }
@@ -218,6 +298,18 @@
       .panel-heading { padding: 16px; }
       th, td { padding-right: 12px; padding-left: 12px; }
       .login-card { padding: 27px 23px; }
+      .launch-hero { min-height: 194px; padding: 22px; }
+      .launch-toolbar { align-items: flex-start; }
+      .launch-primary { min-height: 36px; padding: 0 10px; font-size: 10px; white-space: nowrap; }
+      .launch-stats { gap: 7px; }
+      .launch-stat { min-height: 72px; padding: 11px; }
+      .launch-stat-label { font-size: 9px; }
+      .launch-stat-value { font-size: 18px; }
+      .launch-form-grid { grid-template-columns: 1fr; }
+      .launch-form-grid .field.full { grid-column: auto; }
+      .launch-form-actions { align-items: flex-start; flex-direction: column; }
+      .launch-form-actions > div { width: 100%; }
+      .launch-form-actions .text-button, .launch-form-actions .launch-primary { flex: 1; }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
@@ -233,7 +325,7 @@
       </div>
       <div class="eyebrow">Admin access</div>
       <h1>Welcome back</h1>
-      <p class="subtitle">Sign in with your Firebase account to view form submissions.</p>
+      <p class="subtitle">Sign in to manage submissions and publish launch countdowns.</p>
       <div class="field">
         <label for="email">Email address</label>
         <input id="email" type="email" autocomplete="username" placeholder="you@example.com" required>
@@ -258,9 +350,15 @@
         <div class="brand-caption">Admin workspace</div>
       </div>
       <div class="nav-label">Workspace</div>
-      <div class="nav-item active">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10"/></svg>
-        Form submissions
+      <div class="workspace-nav" aria-label="Workspace sections">
+        <button id="nav-submissions" class="nav-item active" type="button" aria-current="page">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10"/></svg>
+          Form submissions
+        </button>
+        <button id="nav-launches" class="nav-item" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2M8 2 6 4m10-2 2 2"/></svg>
+          Launch countdowns
+        </button>
       </div>
       <div class="sidebar-bottom">
         <div class="secure-note">
@@ -268,7 +366,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg>
             Admin protected
           </div>
-          <p>Any signed-in account in this Firebase project can access submission data.</p>
+          <p>Only trusted Firebase accounts should be enabled for this admin project.</p>
         </div>
         <div class="user-card">
           <div id="user-avatar" class="avatar">A</div>
@@ -281,7 +379,7 @@
     </aside>
     <main class="main">
       <header class="topbar">
-        <div class="breadcrumb">Workspace <span aria-hidden="true">/</span> <strong>Submissions</strong></div>
+        <div class="breadcrumb">Workspace <span aria-hidden="true">/</span> <strong id="workspace-name">Submissions</strong></div>
         <div class="top-actions">
           <div class="connection"><span class="connection-dot"></span> Secure connection</div>
           <button id="refresh" class="icon-button" type="button" aria-label="Refresh submissions" title="Refresh submissions">
@@ -289,7 +387,7 @@
           </button>
         </div>
       </header>
-      <div class="content">
+      <div id="submissions-workspace" class="content workspace-view">
         <div id="setup-notice" class="notice hidden"></div>
         <div id="load-error" class="notice error hidden" role="alert"></div>
         <section class="page-heading">
@@ -350,6 +448,43 @@
           <div class="table-footer"><span id="result-count">Loading submissions...</span><span>Up to 100 records</span></div>
         </section>
       </div>
+      <section id="launches-workspace" class="content workspace-view hidden" aria-labelledby="launches-title">
+        <div id="launch-error" class="notice error launch-notice hidden" role="alert"></div>
+        <div id="launch-message" class="notice launch-notice hidden" role="status"></div>
+        <div class="launch-hero">
+          <div class="launch-hero-content">
+            <div class="eyebrow">Launch studio</div>
+            <h2 id="launches-title">Make the next release an event.</h2>
+            <p>Create polished, shareable countdowns for new games, features, and announcements. Draft privately, then publish when you’re ready.</p>
+          </div>
+        </div>
+        <section class="launch-stats" aria-label="Countdown overview">
+          <div class="launch-stat"><div class="launch-stat-label">Total countdowns</div><div id="launch-total" class="launch-stat-value">—</div></div>
+          <div class="launch-stat"><div class="launch-stat-label">Published</div><div id="launch-published" class="launch-stat-value">—</div></div>
+          <div class="launch-stat"><div class="launch-stat-label">Next launch</div><div id="launch-next" class="launch-stat-value" style="font-size:14px">—</div></div>
+        </section>
+        <div class="launch-toolbar">
+          <div><h2>Your countdowns</h2><p>Manage upcoming releases and public launch pages.</p></div>
+          <div style="display:flex;align-items:center;gap:9px">
+            <a class="text-button" href="https://www.carzzyapps.com/launch-countdowns/" target="_blank" rel="noopener noreferrer">View live page</a>
+            <button id="refresh-launches" class="icon-button" type="button" aria-label="Refresh countdowns" title="Refresh countdowns">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9A7 7 0 0 1 17.5 6L20 12M4 12l2.5 6A7 7 0 0 0 18.4 15"/></svg>
+            </button>
+            <button id="create-launch" class="launch-primary" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              New countdown
+            </button>
+          </div>
+        </div>
+        <div id="launch-filters" class="launch-filters" role="group" aria-label="Filter countdowns">
+          <button class="launch-filter" type="button" data-launch-filter="all" aria-pressed="true">All</button>
+          <button class="launch-filter" type="button" data-launch-filter="published" aria-pressed="false">Published</button>
+          <button class="launch-filter" type="button" data-launch-filter="draft" aria-pressed="false">Drafts</button>
+        </div>
+        <div id="launch-list" class="launch-grid" aria-live="off">
+          <div class="launch-empty"><div><span class="spinner" aria-label="Loading countdowns"></span><p class="empty-copy">Loading countdowns…</p></div></div>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -392,13 +527,86 @@
     </form>
   </div>
 
+  <div id="launch-editor-backdrop" class="modal-backdrop hidden" role="presentation">
+    <form id="launch-form" class="detail-modal launch-modal" role="dialog" aria-modal="true" aria-labelledby="launch-form-title">
+      <div class="modal-head">
+        <div><h2 id="launch-form-title">Create a launch countdown</h2><p>Set the moment, give it a name, and choose when it goes live.</p></div>
+        <button id="close-launch-editor" class="icon-button" type="button" aria-label="Close countdown editor">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m18 6-12 12M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="launch-form-grid">
+          <div class="field full">
+            <label for="launch-title">Countdown title</label>
+            <input id="launch-title" type="text" maxlength="80" placeholder="e.g. Neon Drift launches" required>
+          </div>
+          <div class="field">
+            <label for="launch-category">Release type</label>
+            <select id="launch-category">
+              <option>New game</option>
+              <option>Game update</option>
+              <option>New feature</option>
+              <option>Announcement</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="launch-target">Launch date and time</label>
+            <input id="launch-target" type="datetime-local" required>
+          </div>
+          <div class="field full">
+            <label for="launch-subtitle">Short tagline <span class="form-hint">(optional)</span></label>
+            <input id="launch-subtitle" type="text" maxlength="120" placeholder="A short line to build anticipation">
+          </div>
+          <div class="field full">
+            <label for="launch-description">What’s launching? <span class="form-hint">(optional)</span></label>
+            <textarea id="launch-description" maxlength="400" placeholder="Add a little context for players. Keep it short and exciting."></textarea>
+          </div>
+          <div class="field">
+            <label for="launch-accent">Countdown accent</label>
+            <select id="launch-accent">
+              <option value="teal">Carzzy teal</option>
+              <option value="blue">Electric blue</option>
+              <option value="violet">Arcade violet</option>
+              <option value="amber">Launch amber</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="launch-status">Visibility</label>
+            <select id="launch-status">
+              <option value="draft">Save as draft</option>
+              <option value="published">Publish countdown</option>
+            </select>
+          </div>
+          <div class="field full">
+            <label>Live preview</label>
+            <div id="launch-preview" class="launch-preview">
+              <div id="launch-preview-category" class="launch-preview-label">New game</div>
+              <div id="launch-preview-title" class="launch-preview-title">Your launch title</div>
+              <p id="launch-preview-copy" class="launch-preview-copy">Your tagline will appear here.</p>
+            </div>
+          </div>
+        </div>
+        <p id="launch-form-error" class="launch-form-message" role="alert"></p>
+        <div class="launch-form-actions">
+          <span class="form-hint">Published countdowns can be opened and shared by anyone.</span>
+          <div>
+            <button id="cancel-launch-editor" class="text-button" type="button">Cancel</button>
+            <button id="save-launch" class="launch-primary" type="submit">Save countdown</button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
     import {
       getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut
     } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
     import {
-      collection, getDocs, getFirestore, limit, orderBy, query
+      addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore,
+      limit, orderBy, query, serverTimestamp, Timestamp, updateDoc
     } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -415,6 +623,14 @@
       { id: "contact-form", label: "Contact Form", collection: "contactSubmissions", kind: "contact" }
     ];
     const CUSTOM_TABS_STORAGE_KEY = "carzzyapps-admin-custom-tabs";
+    const LAUNCH_COLLECTION = "launchCountdowns";
+    const PUBLIC_LAUNCH_URL = "https://www.carzzyapps.com/launch-countdowns/";
+    const LAUNCH_ACCENTS = {
+      teal: "#00d1b2",
+      blue: "#66aaff",
+      violet: "#b49aff",
+      amber: "#f3c779"
+    };
 
     const $ = (id) => document.getElementById(id);
     const loginScreen = $("login-screen");
@@ -433,6 +649,11 @@
     let auth;
     let db;
     let submissions = [];
+    let launchCountdowns = [];
+    let launchFilter = "all";
+    let editingLaunchId = null;
+    let launchLoadSequence = 0;
+    let launchMessageTimer;
 
     function showSetupNotice(message) {
       setupNotice.textContent = message;
@@ -527,6 +748,278 @@
       return new Intl.DateTimeFormat(undefined, {
         month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit"
       }).format(date);
+    }
+
+    function launchDate(data) {
+      const value = data.targetAt;
+      if (value?.toDate instanceof Function) return value.toDate();
+      if (value?.seconds != null) return new Date(value.seconds * 1000);
+      return null;
+    }
+
+    function localDateTimeValue(date) {
+      const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+      return local.toISOString().slice(0, 16);
+    }
+
+    function renderLaunchStats() {
+      const published = launchCountdowns.filter(({ data }) => data.status === "published");
+      const next = published
+        .map(({ data }) => launchDate(data))
+        .filter((date) => date && date > new Date())
+        .sort((a, b) => a - b)[0];
+      $("launch-total").textContent = String(launchCountdowns.length);
+      $("launch-published").textContent = String(published.length);
+      $("launch-next").textContent = next
+        ? new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(next)
+        : "None scheduled";
+    }
+
+    function countdownMarkup(target) {
+      const remaining = Math.max(0, target.getTime() - Date.now());
+      const days = Math.floor(remaining / 86400000);
+      const hours = Math.floor((remaining % 86400000) / 3600000);
+      const minutes = Math.floor((remaining % 3600000) / 60000);
+      const seconds = Math.floor((remaining % 60000) / 1000);
+      return `<div class="launch-countdown" aria-label="${days} days, ${hours} hours, ${minutes} minutes remaining">
+        <div class="launch-count-unit"><strong>${days}</strong><span>Days</span></div>
+        <div class="launch-count-unit"><strong>${String(hours).padStart(2, "0")}</strong><span>Hours</span></div>
+        <div class="launch-count-unit"><strong>${String(minutes).padStart(2, "0")}</strong><span>Min</span></div>
+        <div class="launch-count-unit"><strong>${String(seconds).padStart(2, "0")}</strong><span>Sec</span></div>
+      </div>`;
+    }
+
+    function updateLaunchTimers() {
+      for (const card of $("launch-list").querySelectorAll("[data-target-time]")) {
+        const target = new Date(Number(card.dataset.targetTime));
+        const timer = card.querySelector(".launch-countdown");
+        if (timer && !Number.isNaN(target.getTime())) timer.outerHTML = countdownMarkup(target);
+      }
+    }
+
+    function renderLaunches() {
+      const launches = launchCountdowns.filter(({ data }) =>
+        launchFilter === "all" || data.status === launchFilter
+      );
+      renderLaunchStats();
+      if (launches.length === 0) {
+        const isEmpty = launchCountdowns.length === 0;
+        $("launch-list").innerHTML = `<div class="launch-empty"><div>
+          <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+          <h3>${isEmpty ? "Your launch calendar is clear" : `No ${escapeHtml(launchFilter)} countdowns`}</h3>
+          <p>${isEmpty ? "Create a countdown for your next game or feature release. Save it as a draft or publish it when it’s ready." : "Try another filter to see your countdowns."}</p>
+        </div></div>`;
+        return;
+      }
+
+      $("launch-list").innerHTML = launches.map(({ id, data }) => {
+        const target = launchDate(data);
+        const accent = LAUNCH_ACCENTS[data.accent] || LAUNCH_ACCENTS.teal;
+        const status = data.status === "published" ? "published" : "draft";
+        const shareUrl = `${PUBLIC_LAUNCH_URL}?id=${encodeURIComponent(id)}`;
+        const subtitle = data.subtitle || data.description || "A new release is on the horizon.";
+        return `<article class="launch-card" style="--launch-accent:${accent}">
+          <div class="launch-card-top">
+            <div class="launch-card-topline">
+              <span class="launch-category">${escapeHtml(data.category || "Launch")}</span>
+              <span class="launch-status ${status}">${status === "published" ? "Published" : "Draft"}</span>
+            </div>
+            <h3>${escapeHtml(data.title || "Untitled countdown")}</h3>
+            <p class="launch-subtitle">${escapeHtml(subtitle)}</p>
+          </div>
+          <div class="launch-card-body">
+            <div data-target-time="${target ? target.getTime() : ""}">${target ? countdownMarkup(target) : '<span class="launch-date">Launch date unavailable</span>'}</div>
+            <div class="launch-date">${escapeHtml(formatDateTime(target))}</div>
+            <div class="launch-card-actions">
+              <button class="launch-action" type="button" data-launch-action="edit" data-launch-id="${escapeHtml(id)}">Edit</button>
+              <button class="launch-action" type="button" data-launch-action="toggle-status" data-launch-id="${escapeHtml(id)}">${status === "published" ? "Unpublish" : "Publish"}</button>
+              ${status === "published" ? `<button class="launch-action" type="button" data-launch-action="copy-link" data-launch-url="${escapeHtml(shareUrl)}">Copy public link</button>` : ""}
+              <button class="launch-action danger" type="button" data-launch-action="delete" data-launch-id="${escapeHtml(id)}">Delete</button>
+            </div>
+          </div>
+        </article>`;
+      }).join("");
+    }
+
+    async function loadLaunchCountdowns() {
+      const sequence = ++launchLoadSequence;
+      $("launch-error").classList.add("hidden");
+      try {
+        const snapshot = await getDocs(query(
+          collection(db, LAUNCH_COLLECTION),
+          orderBy("targetAt", "asc"),
+          limit(100)
+        ));
+        if (sequence !== launchLoadSequence) return;
+        launchCountdowns = snapshot.docs.map((document) => ({
+          id: document.id,
+          data: document.data()
+        }));
+        renderLaunches();
+      } catch (error) {
+        console.error("Unable to load launch countdowns.", error);
+        if (sequence !== launchLoadSequence) return;
+        $("launch-error").textContent = error.code === "permission-denied"
+          ? "Firestore rules do not allow this account to manage launch countdowns. Deploy the launchCountdowns rules from the admin workspace setup."
+          : "Launch countdowns could not be loaded. Check the Firebase connection and Firestore rules, then refresh.";
+        $("launch-error").classList.remove("hidden");
+        $("launch-list").innerHTML = '<div class="launch-empty"><p class="empty-copy">The countdown list could not be loaded.</p></div>';
+      }
+    }
+
+    function showLaunchMessage(message) {
+      $("launch-message").textContent = message;
+      $("launch-message").classList.remove("hidden");
+      window.clearTimeout(launchMessageTimer);
+      launchMessageTimer = window.setTimeout(() => $("launch-message").classList.add("hidden"), 4500);
+    }
+
+    function showWorkspace(section) {
+      const launches = section === "launches";
+      $("submissions-workspace").classList.toggle("hidden", launches);
+      $("launches-workspace").classList.toggle("hidden", !launches);
+      $("nav-submissions").classList.toggle("active", !launches);
+      $("nav-launches").classList.toggle("active", launches);
+      $("nav-submissions").toggleAttribute("aria-current", !launches);
+      $("nav-launches").toggleAttribute("aria-current", launches);
+      $("workspace-name").textContent = launches ? "Launch countdowns" : "Submissions";
+      $("refresh").classList.toggle("hidden", launches);
+      $("refresh-label").classList.toggle("hidden", launches);
+    }
+
+    function updateLaunchPreview() {
+      const title = $("launch-title").value.trim();
+      const subtitle = $("launch-subtitle").value.trim();
+      const accent = LAUNCH_ACCENTS[$("launch-accent").value] || LAUNCH_ACCENTS.teal;
+      $("launch-preview-title").textContent = title || "Your launch title";
+      $("launch-preview-category").textContent = $("launch-category").value;
+      $("launch-preview-copy").textContent = subtitle || "Your tagline will appear here.";
+      $("launch-preview").style.setProperty("--launch-accent", accent);
+    }
+
+    function openLaunchEditor(launch = null) {
+      editingLaunchId = launch?.id || null;
+      $("launch-form").reset();
+      $("launch-form-error").textContent = "";
+      $("launch-form-title").textContent = launch ? "Edit launch countdown" : "Create a launch countdown";
+      $("save-launch").textContent = "Save countdown";
+      $("launch-title").value = launch?.data.title || "";
+      $("launch-category").value = launch?.data.category || "New game";
+      $("launch-target").value = localDateTimeValue(
+        launch ? launchDate(launch.data) : new Date(Date.now() + 7 * 86400000)
+      );
+      $("launch-subtitle").value = launch?.data.subtitle || "";
+      $("launch-description").value = launch?.data.description || "";
+      $("launch-accent").value = launch?.data.accent || "teal";
+      $("launch-status").value = launch?.data.status || "draft";
+      $("launch-editor-backdrop").classList.remove("hidden");
+      updateLaunchPreview();
+      $("launch-title").focus();
+    }
+
+    function closeLaunchEditor() {
+      $("launch-editor-backdrop").classList.add("hidden");
+      editingLaunchId = null;
+    }
+
+    async function saveLaunch(event) {
+      event.preventDefault();
+      const title = $("launch-title").value.trim();
+      const targetDate = new Date($("launch-target").value);
+      if (!title) {
+        $("launch-form-error").textContent = "Add a title for this countdown.";
+        $("launch-title").focus();
+        return;
+      }
+      if (Number.isNaN(targetDate.getTime()) || targetDate <= new Date()) {
+        $("launch-form-error").textContent = "Choose a launch date and time in the future.";
+        $("launch-target").focus();
+        return;
+      }
+
+      const button = $("save-launch");
+      button.disabled = true;
+      button.textContent = "Saving…";
+      $("launch-form-error").textContent = "";
+      const data = {
+        title,
+        category: $("launch-category").value,
+        targetAt: Timestamp.fromDate(targetDate),
+        subtitle: $("launch-subtitle").value.trim(),
+        description: $("launch-description").value.trim(),
+        accent: $("launch-accent").value,
+        status: $("launch-status").value,
+        updatedAt: serverTimestamp()
+      };
+      try {
+        if (editingLaunchId) {
+          await updateDoc(doc(db, LAUNCH_COLLECTION, editingLaunchId), data);
+        } else {
+          await addDoc(collection(db, LAUNCH_COLLECTION), {
+            ...data,
+            createdAt: serverTimestamp()
+          });
+        }
+        closeLaunchEditor();
+        await loadLaunchCountdowns();
+        showLaunchMessage(data.status === "published"
+          ? "Countdown saved and published."
+          : "Countdown saved as a draft.");
+      } catch (error) {
+        console.error("Unable to save launch countdown.", error);
+        $("launch-form-error").textContent = error.code === "permission-denied"
+          ? "Firestore rejected this save. Deploy the launchCountdowns rules from the admin workspace setup."
+          : "This countdown could not be saved. Check your connection and try again.";
+      } finally {
+        button.disabled = false;
+        button.textContent = "Save countdown";
+      }
+    }
+
+    async function handleLaunchAction(event) {
+      const button = event.target.closest("[data-launch-action]");
+      if (!button) return;
+      const action = button.dataset.launchAction;
+      const launch = launchCountdowns.find(({ id }) => id === button.dataset.launchId);
+      if (action === "edit" && launch) {
+        openLaunchEditor(launch);
+        return;
+      }
+      if (action === "copy-link") {
+        try {
+          await navigator.clipboard.writeText(button.dataset.launchUrl);
+          showLaunchMessage("Public countdown link copied.");
+        } catch (error) {
+          console.error("Unable to copy the public countdown link.", error);
+          $("launch-error").textContent = `Copy failed. Open this link manually: ${button.dataset.launchUrl}`;
+          $("launch-error").classList.remove("hidden");
+        }
+        return;
+      }
+      if (!launch) return;
+      if (action === "delete" && !window.confirm(`Delete “${launch.data.title}”? This cannot be undone.`)) return;
+      button.disabled = true;
+      try {
+        if (action === "delete") {
+          await deleteDoc(doc(db, LAUNCH_COLLECTION, launch.id));
+          showLaunchMessage("Countdown deleted.");
+        } else if (action === "toggle-status") {
+          const status = launch.data.status === "published" ? "draft" : "published";
+          await updateDoc(doc(db, LAUNCH_COLLECTION, launch.id), {
+            status,
+            updatedAt: serverTimestamp()
+          });
+          showLaunchMessage(status === "published" ? "Countdown published." : "Countdown moved to drafts.");
+        }
+        await loadLaunchCountdowns();
+      } catch (error) {
+        console.error("Unable to update launch countdown.", error);
+        $("launch-error").textContent = error.code === "permission-denied"
+          ? "Firestore rules do not allow this change. Deploy the launchCountdowns rules from the admin workspace setup."
+          : "This countdown could not be updated. Check your connection and try again.";
+        $("launch-error").classList.remove("hidden");
+        button.disabled = false;
+      }
     }
 
     function renderStats(items) {
@@ -698,6 +1191,7 @@
       $("user-email").textContent = user.email || "Administrator";
       $("user-avatar").textContent = (user.email || "A").slice(0, 1).toUpperCase();
       selectTab(currentTab);
+      loadLaunchCountdowns();
     }
 
     loginForm.addEventListener("submit", async (event) => {
@@ -726,7 +1220,10 @@
       $("load-error").textContent = "Sign-out failed. Please try again.";
       $("load-error").classList.remove("hidden");
     }));
+    $("nav-submissions").addEventListener("click", () => showWorkspace("submissions"));
+    $("nav-launches").addEventListener("click", () => showWorkspace("launches"));
     $("refresh").addEventListener("click", loadSubmissions);
+    $("refresh-launches").addEventListener("click", loadLaunchCountdowns);
     $("refresh-label").addEventListener("click", loadSubmissions);
     searchInput.addEventListener("input", renderRows);
     $("tabs").addEventListener("click", (event) => {
@@ -805,7 +1302,30 @@
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") $("detail-backdrop").classList.add("hidden");
       if (event.key === "Escape") $("add-tab-backdrop").classList.add("hidden");
+      if (event.key === "Escape") closeLaunchEditor();
     });
+    $("create-launch").addEventListener("click", () => openLaunchEditor());
+    $("close-launch-editor").addEventListener("click", closeLaunchEditor);
+    $("cancel-launch-editor").addEventListener("click", closeLaunchEditor);
+    $("launch-editor-backdrop").addEventListener("click", (event) => {
+      if (event.target === $("launch-editor-backdrop")) closeLaunchEditor();
+    });
+    $("launch-form").addEventListener("submit", saveLaunch);
+    for (const id of ["launch-title", "launch-subtitle", "launch-category", "launch-accent"]) {
+      $(id).addEventListener("input", updateLaunchPreview);
+      $(id).addEventListener("change", updateLaunchPreview);
+    }
+    $("launch-list").addEventListener("click", handleLaunchAction);
+    $("launch-filters").addEventListener("click", (event) => {
+      const filter = event.target.closest("[data-launch-filter]");
+      if (!filter) return;
+      launchFilter = filter.dataset.launchFilter;
+      for (const button of $("launch-filters").querySelectorAll("[data-launch-filter]")) {
+        button.setAttribute("aria-pressed", String(button === filter));
+      }
+      renderLaunches();
+    });
+    window.setInterval(updateLaunchTimers, 1000);
 
     try {
       const app = initializeApp(firebaseConfig);
