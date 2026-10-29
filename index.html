@@ -562,6 +562,11 @@
             <label for="launch-description">What’s launching? <span class="form-hint">(optional)</span></label>
             <textarea id="launch-description" maxlength="400" placeholder="Add a little context for players. Keep it short and exciting."></textarea>
           </div>
+          <div class="field full">
+            <label for="launch-live-url">Destination link <span class="form-hint">(optional)</span></label>
+            <input id="launch-live-url" type="url" maxlength="2048" placeholder="https://www.carzzyapps.com/your-launch">
+            <span class="form-hint">Shown as a “Now Live” button when the countdown ends. Use an http:// or https:// link.</span>
+          </div>
           <div class="field">
             <label for="launch-accent">Countdown accent</label>
             <select id="launch-accent">
@@ -910,6 +915,7 @@
       );
       $("launch-subtitle").value = launch?.data.subtitle || "";
       $("launch-description").value = launch?.data.description || "";
+      $("launch-live-url").value = launch?.data.liveUrl || "";
       $("launch-accent").value = launch?.data.accent || "teal";
       $("launch-status").value = launch?.data.status || "draft";
       $("launch-editor-backdrop").classList.remove("hidden");
@@ -936,6 +942,21 @@
         $("launch-target").focus();
         return;
       }
+      const liveUrlValue = $("launch-live-url").value.trim();
+      let liveUrl = "";
+      if (liveUrlValue) {
+        try {
+          const parsedUrl = new URL(liveUrlValue);
+          if (parsedUrl.protocol !== "https:" && parsedUrl.protocol !== "http:") {
+            throw new TypeError("Only HTTP and HTTPS links are supported.");
+          }
+          liveUrl = parsedUrl.href;
+        } catch (error) {
+          $("launch-form-error").textContent = "Enter a valid http:// or https:// destination link.";
+          $("launch-live-url").focus();
+          return;
+        }
+      }
 
       const button = $("save-launch");
       button.disabled = true;
@@ -947,6 +968,7 @@
         targetAt: Timestamp.fromDate(targetDate),
         subtitle: $("launch-subtitle").value.trim(),
         description: $("launch-description").value.trim(),
+        liveUrl,
         accent: $("launch-accent").value,
         status: $("launch-status").value,
         updatedAt: serverTimestamp()

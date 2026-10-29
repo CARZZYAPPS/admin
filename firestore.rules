@@ -46,7 +46,7 @@ service cloud.firestore {
       function validLaunchCountdown(data) {
         return data.keys().hasOnly([
           'title', 'category', 'targetAt', 'subtitle', 'description',
-          'accent', 'status', 'createdAt', 'updatedAt'
+          'liveUrl', 'accent', 'status', 'createdAt', 'updatedAt'
         ])
         && data.keys().hasAll([
           'title', 'category', 'targetAt', 'subtitle', 'description',
@@ -61,6 +61,7 @@ service cloud.firestore {
         && data.subtitle.size() <= 120
         && data.description is string
         && data.description.size() <= 400
+        && (!('liveUrl' in data) || (data.liveUrl is string && data.liveUrl.size() <= 2048))
         && data.accent in ['teal', 'blue', 'violet', 'amber']
         && data.status in ['draft', 'published']
         && data.createdAt is timestamp
