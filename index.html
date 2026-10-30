@@ -1134,16 +1134,35 @@
       $("crema-score-empty").classList.add("hidden");
       $("crema-score-message").textContent = "";
       try {
-        const snapshot = await getDocs(query(
-          collection(cremaDb, "cremaRushProgress"),
-          orderBy("best", "desc"),
-          limit(100)
-        ));
-        const records = snapshot.docs.map((scoreDoc) => ({
+        const [currentSnapshot, legacySnapshot] = await Promise.all([
+          getDocs(query(
+            collection(cremaDb, "cremaRushNoGraphicsProgress"),
+            orderBy("best", "desc"),
+            limit(100)
+          )),
+          getDocs(query(
+            collection(cremaDb, "cremaRushProgress"),
+            orderBy("best", "desc"),
+            limit(100)
+          ))
+        ]);
+        const currentIds = new Set(currentSnapshot.docs.map((scoreDoc) => scoreDoc.id));
+        const records = currentSnapshot.docs.map((scoreDoc) => ({
           id: scoreDoc.id,
           data: scoreDoc.data(),
+          collection: "cremaRushNoGraphicsProgress",
           username: ""
         }));
+        for (const scoreDoc of legacySnapshot.docs) {
+          if (!currentIds.has(scoreDoc.id)) records.push({
+            id: scoreDoc.id,
+            data: scoreDoc.data(),
+            collection: "cremaRushProgress",
+            username: ""
+          });
+        }
+        records.sort((left, right) => right.data.best - left.data.best);
+        records.splice(100);
         const playerIds = records.map((record) => record.id);
         const usernameQueries = [];
         for (let index = 0; index < playerIds.length; index += 30) {
@@ -1254,7 +1273,7 @@
       $("score-edit-error").classList.remove("error");
       try {
         const previousBest = Number(editingCremaScore.data.best) || 0;
-        const scoreDoc = doc(cremaDb, "cremaRushProgress", editingCremaScore.id);
+        const scoreDoc = doc(cremaDb, editingCremaScore.collection, editingCremaScore.id);
         const eventDoc = doc(collection(cremaDb, "cremaRushScoreEvents"));
         const batch = writeBatch(cremaDb);
         batch.update(scoreDoc, {
@@ -1272,6 +1291,7 @@
           previousBest,
           newBest: score,
           changedBy: cremaAuth.currentUser.email,
+          gameVersion: "no-graphics",
           savedAt: serverTimestamp()
         });
         await batch.commit();

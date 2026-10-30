@@ -16,6 +16,12 @@ A static Firebase Authentication and Cloud Firestore workspace for browsing Carz
 
 Crema Rush progress records include the player's display username. Each successful game save and admin correction also writes an immutable `cremaRushScoreEvents` record in the same Firestore batch as the score update. The **Recent score activity** panel shows the latest 20 saves with their player, score details, timestamp, and admin email for corrections. Deploy the updated root `firestore.rules` to enable event writes and admin reads.
 
+The score editor prioritizes `cremaRushNoGraphicsProgress` records and also
+shows legacy `cremaRushProgress` records that have not yet been migrated by a
+player opening the updated no-graphics game. The graphics/Tycoon game stores
+saves separately in `cremaRushYesGraphicsSaves`; existing `cremaTycoonSaves`
+documents are copied forward the next time their owner opens that game.
+
 **Access note:** every Firebase Auth account in this project can read feedback and contact form documents, including submitters' names, email addresses, ratings, and messages, and can manage countdowns. Keep account creation restricted to people you trust. The Feedback tab queries the newest 100 documents by `createdAt`. The Contact Form tab reads up to 100 documents and sorts them by any recognized submission date; this also includes records that do not have a `createdAt` field. Opening a row shows every document field.
 
 The Crema Rush score editor connects to the separate `carzzy-apps` project. Its score read/write access is restricted by the `adminUsers` allowlist in that project's Firestore rules; signed-in players can only edit their own game progress.
