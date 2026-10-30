@@ -538,6 +538,17 @@
             <div class="table-footer"><span id="crema-score-count">Connect to load scores.</span><span>Up to 100 players</span></div>
           </div>
           <p id="crema-score-message" class="score-message" role="status" aria-live="polite"></p>
+          <section class="panel" aria-labelledby="crema-score-activity-title" style="margin-top:18px">
+            <div class="panel-heading">
+              <div>
+                <h2 id="crema-score-activity-title" class="panel-title">Recent score activity</h2>
+                <p class="panel-description">Player saves and admin corrections, newest first.</p>
+              </div>
+            </div>
+            <div id="crema-score-activity" class="modal-body" aria-live="polite">
+              <p class="empty-copy">Activity will appear when a score is saved.</p>
+            </div>
+          </section>
         </section>
       </section>
     </main>
@@ -688,7 +699,7 @@
     } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
     import {
       addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore,
-      limit, orderBy, query, serverTimestamp, Timestamp, updateDoc, where
+      limit, orderBy, query, serverTimestamp, Timestamp, updateDoc, where, writeBatch
     } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -1006,6 +1017,10 @@
         showCremaNotice("Sign out and sign back in with your admin account to enable score editing.");
         return;
       }
+      if (!auth.currentUser || auth.currentUser.email?.toLowerCase() !== user.email?.toLowerCase()) {
+        showCremaNotice("The game project is signed in as a different account. Sign out and sign back in with the same admin email and password.");
+        return;
+      }
       try {
         const adminSnapshot = await getDoc(doc(cremaDb, "adminUsers", user.uid));
         if (!adminSnapshot.exists() || adminSnapshot.data().enabled !== true) {
@@ -1031,6 +1046,56 @@
       }
     }
 
+    function renderCremaScoreActivity(events) {
+      const container = $("crema-score-activity");
+      container.replaceChildren();
+      if (!events.length) {
+        const empty = document.createElement("p");
+        empty.className = "empty-copy";
+        empty.textContent = "No score activity has been recorded yet.";
+        container.append(empty);
+        return;
+      }
+      for (const event of events) {
+        const item = document.createElement("div");
+        item.className = "detail-field";
+        const title = document.createElement("div");
+        title.className = "detail-key";
+        title.textContent = event.actorType === "admin" ? "Admin correction" : "Player score saved";
+        const summary = document.createElement("div");
+        summary.className = "detail-value";
+        summary.textContent = event.actorType === "admin"
+          ? `${event.username} · ${Number(event.previousBest).toLocaleString()} → ${Number(event.newBest).toLocaleString()} · edited by ${event.changedBy}`
+          : `${event.username} · best ${Number(event.best).toLocaleString()} · last shift ${Number(event.lastScore).toLocaleString()} · ${Number(event.shifts).toLocaleString()} shift(s)`;
+        const time = document.createElement("div");
+        time.className = "submitter-email";
+        time.textContent = formatDateTime(event.savedAt?.toDate instanceof Function ? event.savedAt.toDate() : null);
+        item.append(title, summary, time);
+        container.append(item);
+      }
+    }
+
+    async function loadCremaScoreActivity() {
+      const container = $("crema-score-activity");
+      try {
+        const snapshot = await getDocs(query(
+          collection(cremaDb, "cremaRushScoreEvents"),
+          orderBy("savedAt", "desc"),
+          limit(20)
+        ));
+        renderCremaScoreActivity(snapshot.docs.map((event) => event.data()));
+      } catch (error) {
+        console.error("Unable to load Crema Rush score activity.", error);
+        container.replaceChildren();
+        const message = document.createElement("p");
+        message.className = "score-message error";
+        message.textContent = error.code === "permission-denied"
+          ? "Firestore denied score activity access. Deploy the updated Crema Rush rules."
+          : "Score activity could not be loaded. Check the connection and try again.";
+        container.append(message);
+      }
+    }
+
     async function signInToCremaProject(email, password) {
       if (!cremaAuth) {
         showCremaNotice("Crema Rush authentication is unavailable. Check the game Firebase configuration and try again.", true);
@@ -1048,6 +1113,12 @@
         showCremaNotice(
           error.code === "auth/operation-not-allowed"
             ? "Enable Email/Password sign-in for the Crema Rush Firebase project, then sign in again."
+            : error.code === "auth/unauthorized-domain"
+              ? "Add this admin site's domain to the authorized domains for the Crema Rush Firebase project."
+              : error.code === "auth/invalid-credential" || error.code === "auth/user-not-found"
+                ? "This email/password must also be enabled for Email/Password sign-in in the Crema Rush Firebase project. Use the same admin email and password in both projects."
+                : error.code === "auth/network-request-failed"
+                  ? "Could not reach Firebase to verify this admin account. Check the connection and try again."
             : "Your admin sign-in worked, but Crema Rush could not verify the same email and password. Make sure this admin account can sign in to the game project, then sign out and try again.",
           true
         );
@@ -1093,9 +1164,10 @@
         }
         cremaScores = records.map((record) => ({
           ...record,
-          username: usernamesByUid.get(record.id) || "Player"
+          username: usernamesByUid.get(record.id) || record.data.username || "Player"
         }));
         renderCremaScores();
+        await loadCremaScoreActivity();
         return true;
       } catch (error) {
         console.error("Unable to load Crema Rush scores.", error);
@@ -1176,18 +1248,42 @@
       const saveButton = $("save-score-edit");
       saveButton.disabled = true;
       saveButton.textContent = "Saving…";
+      const editedUsername = editingCremaScore.username;
+      $("score-edit-error").textContent = `Saving ${editingCremaScore.username}'s score to Firebase…`;
+      $("score-edit-error").classList.remove("hidden");
+      $("score-edit-error").classList.remove("error");
       try {
-        await updateDoc(doc(cremaDb, "cremaRushProgress", editingCremaScore.id), {
+        const previousBest = Number(editingCremaScore.data.best) || 0;
+        const scoreDoc = doc(cremaDb, "cremaRushProgress", editingCremaScore.id);
+        const eventDoc = doc(collection(cremaDb, "cremaRushScoreEvents"));
+        const batch = writeBatch(cremaDb);
+        batch.update(scoreDoc, {
           best: score,
           adminRevision: (Number.isSafeInteger(editingCremaScore.data.adminRevision)
             ? editingCremaScore.data.adminRevision
             : 0) + 1,
+          username: editingCremaScore.username,
           updatedAt: serverTimestamp()
         });
+        batch.set(eventDoc, {
+          actorType: "admin",
+          uid: editingCremaScore.id,
+          username: editingCremaScore.username,
+          previousBest,
+          newBest: score,
+          changedBy: cremaAuth.currentUser.email,
+          savedAt: serverTimestamp()
+        });
+        await batch.commit();
         closeScoreEditor();
+        $("crema-score-message").classList.remove("error");
+        $("crema-score-message").textContent = `Saved ${editedUsername}'s score to Firebase. Refreshing scores and activity…`;
         if (await loadCremaScores()) {
           $("crema-score-message").classList.remove("error");
-          $("crema-score-message").textContent = "Best score updated.";
+          $("crema-score-message").textContent = `Saved ${editedUsername}'s best score and recorded the change.`;
+        } else {
+          $("crema-score-message").textContent = `Saved ${editedUsername}'s score, but the latest scores could not be refreshed.`;
+          $("crema-score-message").classList.add("error");
         }
       } catch (error) {
         console.error("Unable to update the Crema Rush best score.", error);
