@@ -1086,7 +1086,10 @@
         const usernamesByUid = new Map();
         for (const usernames of usernameSnapshots) {
           for (const usernameDoc of usernames.docs) {
-            usernamesByUid.set(usernameDoc.data().uid, usernameDoc.id);
+            usernamesByUid.set(
+              usernameDoc.data().uid,
+              usernameDoc.data().username || usernameDoc.id
+            );
           }
         }
         cremaScores = records.map((record) => ({
