@@ -189,11 +189,7 @@
     .detail-value { color: #dce3df; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; white-space: pre-wrap; }
     .form-hint { color: var(--muted); font-size: 10px; line-height: 1.6; margin: 3px 0 15px; }
     .workspace-view.hidden { display: none; }
-    .score-connect { max-width: 560px; }
-    .score-connect .field { margin-top: 16px; }
-    .score-connect .text-button { margin-top: 7px; }
-    .score-access-note { margin: 15px 0 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
-    .score-access-note code, .score-uid { color: #b7c8c0; font-family: ui-monospace, monospace; }
+    .score-uid { color: #b7c8c0; font-family: ui-monospace, monospace; }
     .score-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 24px 0 14px; }
     .score-toolbar h2 { margin: 0 0 5px; font: 700 16px Manrope, sans-serif; }
     .score-toolbar p { margin: 0; color: var(--muted); font-size: 11px; }
@@ -342,7 +338,7 @@
       </div>
       <div class="eyebrow">Admin access</div>
       <h1>Welcome back</h1>
-      <p class="subtitle">Sign in to manage submissions and publish launch countdowns.</p>
+      <p class="subtitle">Sign in with your admin account to manage submissions, countdowns, and game scores.</p>
       <div class="field">
         <label for="email">Email address</label>
         <input id="email" type="email" autocomplete="username" placeholder="you@example.com" required>
@@ -515,32 +511,11 @@
             <p class="subtitle">Find a player and edit their best shift score.</p>
           </div>
         </section>
-        <section id="crema-connect-panel" class="panel score-connect">
-          <div class="panel-heading">
-            <div>
-              <h2 class="panel-title">Connect to the game</h2>
-              <p class="panel-description">Use an admin-enabled account from the Crema Rush Firebase project.</p>
-            </div>
-          </div>
-          <form id="crema-connect-form" class="modal-body" novalidate>
-            <div class="field">
-              <label for="crema-email">Crema Rush admin email</label>
-              <input id="crema-email" type="email" autocomplete="username" required>
-            </div>
-            <div class="field">
-              <label for="crema-password">Password</label>
-              <input id="crema-password" type="password" autocomplete="current-password" required>
-            </div>
-            <button id="crema-connect-button" class="launch-primary" type="submit">Connect</button>
-            <p class="score-access-note">This is a separate sign-in from the admin workspace. The game account must be added to the Crema Rush project's <code>adminUsers</code> allowlist.</p>
-          </form>
-        </section>
         <section id="crema-scores-panel" class="hidden">
           <div class="score-toolbar">
             <div><h2>Player scores</h2><p id="crema-admin-account"></p></div>
             <div style="display:flex;gap:8px;align-items:center">
               <button id="refresh-crema-scores" class="text-button" type="button">Refresh scores</button>
-              <button id="disconnect-crema" class="text-button" type="button">Disconnect</button>
             </div>
           </div>
           <div class="panel">
@@ -1027,19 +1002,20 @@
     async function checkCremaAdminAccess(user) {
       cremaAuthorized = false;
       $("crema-scores-panel").classList.add("hidden");
-      $("crema-connect-panel").classList.remove("hidden");
-      if (!user || !cremaDb) return;
+      if (!user || !cremaDb) {
+        showCremaNotice("Sign out and sign back in with your admin account to enable score editing.");
+        return;
+      }
       try {
         const adminSnapshot = await getDoc(doc(cremaDb, "adminUsers", user.uid));
         if (!adminSnapshot.exists() || adminSnapshot.data().enabled !== true) {
           showCremaNotice(
-            `This game account is not authorized yet. In the carzzy-apps Firebase console, add adminUsers/${user.uid} with enabled set to true, then deploy the Crema Rush Firestore rules.`,
+            `Your admin account needs score-edit access. In the carzzy-apps Firebase console, allowlist this account's game-project UID (adminUsers/${user.uid}) with enabled set to true, then deploy the Crema Rush Firestore rules.`,
             true
           );
           return;
         }
         cremaAuthorized = true;
-        $("crema-connect-panel").classList.add("hidden");
         $("crema-scores-panel").classList.remove("hidden");
         $("crema-admin-account").textContent = user.email || `Admin UID: ${user.uid}`;
         showCremaNotice("");
@@ -1048,8 +1024,31 @@
         console.error("Unable to verify Crema Rush admin access.", error);
         showCremaNotice(
           error.code === "permission-denied"
-            ? "Firestore denied access. Deploy the updated root firestore.rules to the carzzy-apps project, then add this account to adminUsers."
+            ? "Firestore denied access. Deploy the updated root firestore.rules to the carzzy-apps project, then allowlist this admin account."
             : "Could not connect to Crema Rush. Check the game project's Firebase configuration and try again.",
+          true
+        );
+      }
+    }
+
+    async function signInToCremaProject(email, password) {
+      if (!cremaAuth) {
+        showCremaNotice("Crema Rush authentication is unavailable. Check the game Firebase configuration and try again.", true);
+        return;
+      }
+      showCremaNotice("Verifying your admin account for Crema Rush…");
+      try {
+        const currentUser = cremaAuth.currentUser;
+        if (currentUser?.email?.toLowerCase() !== email.toLowerCase()) {
+          if (currentUser) await signOut(cremaAuth);
+          await signInWithEmailAndPassword(cremaAuth, email, password);
+        }
+      } catch (error) {
+        console.error("Could not verify the admin account with the Crema Rush project.", error);
+        showCremaNotice(
+          error.code === "auth/operation-not-allowed"
+            ? "Enable Email/Password sign-in for the Crema Rush Firebase project, then sign in again."
+            : "Your admin sign-in worked, but Crema Rush could not verify the same email and password. Make sure this admin account can sign in to the game project, then sign out and try again.",
           true
         );
       }
@@ -1531,8 +1530,11 @@
       loginError.classList.add("hidden");
       loginButton.disabled = true;
       loginButton.textContent = "Signing in...";
+      const email = $("email").value.trim();
+      const password = $("password").value;
       try {
-        await signInWithEmailAndPassword(auth, $("email").value.trim(), $("password").value);
+        await signInWithEmailAndPassword(auth, email, password);
+        await signInToCremaProject(email, password);
       } catch (error) {
         console.error("Firebase sign-in failed.", error);
         loginError.textContent = error.code === "auth/invalid-credential"
@@ -1547,11 +1549,16 @@
       }
     });
 
-    $("sign-out").addEventListener("click", () => signOut(auth).catch((error) => {
-      console.error("Firebase sign-out failed.", error);
-      $("load-error").textContent = "Sign-out failed. Please try again.";
-      $("load-error").classList.remove("hidden");
-    }));
+    $("sign-out").addEventListener("click", async () => {
+      try {
+        if (cremaAuth?.currentUser) await signOut(cremaAuth);
+        await signOut(auth);
+      } catch (error) {
+        console.error("Firebase sign-out failed.", error);
+        $("load-error").textContent = "Sign-out failed. Please try again.";
+        $("load-error").classList.remove("hidden");
+      }
+    });
     $("nav-submissions").addEventListener("click", () => showWorkspace("submissions"));
     $("nav-launches").addEventListener("click", () => showWorkspace("launches"));
     $("nav-crema-scores").addEventListener("click", () => showWorkspace("crema-scores"));
@@ -1565,44 +1572,6 @@
       if (!button) return;
       const record = cremaScores.find((score) => score.id === button.dataset.editCremaScore);
       if (record) openScoreEditor(record);
-    });
-    $("crema-connect-form").addEventListener("submit", async (event) => {
-      event.preventDefault();
-      if (!cremaAuth) {
-        showCremaNotice("Crema Rush authentication is not initialized. Reload the page and try again.", true);
-        return;
-      }
-      const button = $("crema-connect-button");
-      button.disabled = true;
-      button.textContent = "Connecting…";
-      const password = $("crema-password").value;
-      $("crema-password").value = "";
-      showCremaNotice("Signing in to the Crema Rush project…");
-      try {
-        await signInWithEmailAndPassword(
-          cremaAuth,
-          $("crema-email").value.trim(),
-          password
-        );
-      } catch (error) {
-        console.error("Crema Rush admin sign-in failed.", error);
-        showCremaNotice(error.code === "auth/invalid-credential"
-          ? "That Crema Rush email and password were not recognized."
-          : error.code === "auth/operation-not-allowed"
-            ? "Enable Email/Password sign-in in the carzzy-apps Firebase project."
-            : "Could not sign in to Crema Rush. Check the game project's Firebase Auth settings and try again.", true);
-      } finally {
-        button.disabled = false;
-        button.textContent = "Connect";
-      }
-    });
-    $("disconnect-crema").addEventListener("click", async () => {
-      try {
-        await signOut(cremaAuth);
-      } catch (error) {
-        console.error("Crema Rush admin sign-out failed.", error);
-        showCremaNotice("Could not disconnect from the Crema Rush project. Try again.", true);
-      }
     });
     $("score-edit-form").addEventListener("submit", saveCremaScore);
     $("close-score-edit").addEventListener("click", closeScoreEditor);
@@ -1719,6 +1688,12 @@
       db = getFirestore(app);
       onAuthStateChanged(auth, (user) => {
         if (!user) {
+          if (cremaAuth?.currentUser) {
+            signOut(cremaAuth).catch((error) => {
+              console.error("Crema Rush sign-out failed.", error);
+              showCremaNotice("Could not sign out from the Crema Rush project. Try again.", true);
+            });
+          }
           showLogin();
           return;
         }
@@ -1734,9 +1709,10 @@
         onAuthStateChanged(cremaAuth, (user) => {
           cremaAuthorized = false;
           if (!user) {
-            $("crema-connect-panel").classList.remove("hidden");
             $("crema-scores-panel").classList.add("hidden");
-            showCremaNotice("");
+            if (auth?.currentUser) {
+              showCremaNotice("Sign out and sign back in with your admin account to enable score editing.");
+            }
             return;
           }
           checkCremaAdminAccess(user);
