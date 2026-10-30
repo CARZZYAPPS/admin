@@ -7,8 +7,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Workspace | Carzzy Apps</title>
 
-  <meta name="description" content="Private Carzzy Apps workspace for submissions and launch countdowns.">
-  <meta name="keywords" content="Carzzy Apps admin, submissions dashboard, launch countdowns">
+  <meta name="description" content="Private Carzzy Apps workspace for submissions, launch countdowns, and game scores.">
+  <meta name="keywords" content="Carzzy Apps admin, submissions dashboard, launch countdowns, game scores">
   <meta name="author" content="Avis, DeBus">
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#0a0c0c">
@@ -16,14 +16,14 @@
   <meta name="application-name" content="Carzzy Apps Admin">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Admin Workspace | Carzzy Apps">
-  <meta name="twitter:description" content="Private Carzzy Apps workspace for submissions and launch countdowns.">
+  <meta name="twitter:description" content="Private Carzzy Apps workspace for submissions, launch countdowns, and game scores.">
   <meta name="twitter:image" content="https://admin.carzzyapps.com/Carzzy%20Apps%20Logo.png">
   <meta name="twitter:image:alt" content="Carzzy Apps logo">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Carzzy Apps Admin">
   <meta property="og:locale" content="en_US">
   <meta property="og:title" content="Admin Workspace | Carzzy Apps">
-  <meta property="og:description" content="Private Carzzy Apps workspace for submissions and launch countdowns.">
+  <meta property="og:description" content="Private Carzzy Apps workspace for submissions, launch countdowns, and game scores.">
   <meta property="og:url" content="https://admin.carzzyapps.com/">
   <meta property="og:image" content="https://admin.carzzyapps.com/Carzzy%20Apps%20Logo.png">
   <meta property="og:image:alt" content="Carzzy Apps logo">
@@ -189,6 +189,21 @@
     .detail-value { color: #dce3df; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; white-space: pre-wrap; }
     .form-hint { color: var(--muted); font-size: 10px; line-height: 1.6; margin: 3px 0 15px; }
     .workspace-view.hidden { display: none; }
+    .score-connect { max-width: 560px; }
+    .score-connect .field { margin-top: 16px; }
+    .score-connect .text-button { margin-top: 7px; }
+    .score-access-note { margin: 15px 0 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
+    .score-access-note code, .score-uid { color: #b7c8c0; font-family: ui-monospace, monospace; }
+    .score-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 24px 0 14px; }
+    .score-toolbar h2 { margin: 0 0 5px; font: 700 16px Manrope, sans-serif; }
+    .score-toolbar p { margin: 0; color: var(--muted); font-size: 11px; }
+    .score-table .score-uid { font-size: 10px; }
+    .score-input { width: 120px; height: 34px; padding: 0 9px; border: 1px solid var(--line); border-radius: 7px; outline: 0; color: var(--text); background: #0d1110; font-size: 12px; }
+    .score-input:focus { border-color: rgba(0,209,178,.6); }
+    .score-message { min-height: 18px; margin: 12px 0 0; color: var(--muted); font-size: 11px; }
+    .score-message.error { color: #ffaaa7; }
+    .score-edit-form { display: flex; align-items: center; gap: 8px; }
+    .score-edit-form .text-button { padding: 8px 10px; }
     .launch-hero {
       position: relative; overflow: hidden; min-height: 214px; display: flex; align-items: flex-end;
       padding: 30px; margin-bottom: 20px; border: 1px solid #253a35; border-radius: 14px;
@@ -310,6 +325,8 @@
       .launch-form-actions { align-items: flex-start; flex-direction: column; }
       .launch-form-actions > div { width: 100%; }
       .launch-form-actions .text-button, .launch-form-actions .launch-primary { flex: 1; }
+      .score-toolbar { align-items: flex-start; flex-direction: column; }
+      .score-toolbar > div:last-child { width: 100%; flex-wrap: wrap; }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
@@ -358,6 +375,10 @@
         <button id="nav-launches" class="nav-item" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2M8 2 6 4m10-2 2 2"/></svg>
           Launch countdowns
+        </button>
+        <button id="nav-crema-scores" class="nav-item" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 19V5m0 14h17M8 15l4-4 3 2 6-7"/></svg>
+          Crema Rush scores
         </button>
       </div>
       <div class="sidebar-bottom">
@@ -485,7 +506,88 @@
           <div class="launch-empty"><div><span class="spinner" aria-label="Loading countdowns"></span><p class="empty-copy">Loading countdowns…</p></div></div>
         </div>
       </section>
+      <section id="crema-scores-workspace" class="content workspace-view hidden" aria-labelledby="crema-scores-title">
+        <div id="crema-scores-notice" class="notice hidden" role="status"></div>
+        <section class="page-heading">
+          <div>
+            <div class="eyebrow">Game admin</div>
+            <h1 id="crema-scores-title">Crema Rush scores</h1>
+            <p class="subtitle">Find a player and edit their best shift score.</p>
+          </div>
+        </section>
+        <section id="crema-connect-panel" class="panel score-connect">
+          <div class="panel-heading">
+            <div>
+              <h2 class="panel-title">Connect to the game</h2>
+              <p class="panel-description">Use an admin-enabled account from the Crema Rush Firebase project.</p>
+            </div>
+          </div>
+          <form id="crema-connect-form" class="modal-body" novalidate>
+            <div class="field">
+              <label for="crema-email">Crema Rush admin email</label>
+              <input id="crema-email" type="email" autocomplete="username" required>
+            </div>
+            <div class="field">
+              <label for="crema-password">Password</label>
+              <input id="crema-password" type="password" autocomplete="current-password" required>
+            </div>
+            <button id="crema-connect-button" class="launch-primary" type="submit">Connect</button>
+            <p class="score-access-note">This is a separate sign-in from the admin workspace. The game account must be added to the Crema Rush project's <code>adminUsers</code> allowlist.</p>
+          </form>
+        </section>
+        <section id="crema-scores-panel" class="hidden">
+          <div class="score-toolbar">
+            <div><h2>Player scores</h2><p id="crema-admin-account"></p></div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button id="refresh-crema-scores" class="text-button" type="button">Refresh scores</button>
+              <button id="disconnect-crema" class="text-button" type="button">Disconnect</button>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-heading">
+              <div><h2 class="panel-title">Best shifts</h2><p class="panel-description">Showing up to 100 players, highest score first.</p></div>
+              <label class="search-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg>
+                <input id="crema-score-search" class="search-input" type="search" placeholder="Search username or player ID" aria-label="Search Crema Rush scores">
+              </label>
+            </div>
+            <div class="table-scroll">
+              <table class="score-table">
+                <thead><tr><th>Player</th><th>Best shift</th><th>Last shift</th><th>Shifts</th><th></th></tr></thead>
+                <tbody id="crema-score-rows"></tbody>
+              </table>
+            </div>
+            <div id="crema-score-empty" class="empty-state hidden">
+              <div><div class="empty-title">No scores found</div><p class="empty-copy">Scores appear after players finish a shift.</p></div>
+            </div>
+            <div class="table-footer"><span id="crema-score-count">Connect to load scores.</span><span>Up to 100 players</span></div>
+          </div>
+          <p id="crema-score-message" class="score-message" role="status" aria-live="polite"></p>
+        </section>
+      </section>
     </main>
+  </div>
+
+  <div id="score-edit-backdrop" class="modal-backdrop hidden" role="presentation">
+    <section class="detail-modal" role="dialog" aria-modal="true" aria-labelledby="score-edit-title">
+      <div class="modal-head">
+        <div><h2 id="score-edit-title">Edit best score</h2><p id="score-edit-player"></p></div>
+        <button id="close-score-edit" class="icon-button" type="button" aria-label="Close score editor">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m18 6-12 12M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <form id="score-edit-form" class="modal-body">
+        <div class="field">
+          <label for="score-edit-value">Best shift score</label>
+          <input id="score-edit-value" class="score-input" type="number" min="0" max="2147483647" step="1" required>
+        </div>
+        <p id="score-edit-error" class="login-error hidden" role="alert"></p>
+        <div style="display:flex;justify-content:flex-end;gap:9px;margin-top:18px">
+          <button id="cancel-score-edit" class="text-button" type="button">Cancel</button>
+          <button id="save-score-edit" class="launch-primary" type="submit">Save score</button>
+        </div>
+      </form>
+    </section>
   </div>
 
   <div id="detail-backdrop" class="modal-backdrop hidden" role="presentation">
@@ -611,7 +713,7 @@
     } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
     import {
       addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore,
-      limit, orderBy, query, serverTimestamp, Timestamp, updateDoc
+      limit, orderBy, query, serverTimestamp, Timestamp, updateDoc, where
     } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -622,6 +724,16 @@
       messagingSenderId: "32843716300",
       appId: "1:32843716300:web:52b3617aa1e05a0c4c9469",
       measurementId: "G-PQXJ25LD54"
+    };
+    const cremaRushFirebaseConfig = {
+      apiKey: "AIzaSyAgu1uiobgixRWcvIja6bI1l6M2KQ36FL4",
+      authDomain: "carzzy-apps.firebaseapp.com",
+      databaseURL: "https://carzzy-apps-default-rtdb.firebaseio.com",
+      projectId: "carzzy-apps",
+      storageBucket: "carzzy-apps.firebasestorage.app",
+      messagingSenderId: "716862658931",
+      appId: "1:716862658931:web:6295033aaa1d8155dc0d06",
+      measurementId: "G-PFJQG2D587"
     };
     const DEFAULT_TABS = [
       { id: "feedback", label: "Feedback", collection: "feedbackSubmissions", kind: "feedback" },
@@ -659,6 +771,11 @@
     let editingLaunchId = null;
     let launchLoadSequence = 0;
     let launchMessageTimer;
+    let activeWorkspace = "submissions";
+    let cremaAuth;
+    let cremaDb;
+    let cremaScores = [];
+    let editingCremaScore = null;
 
     function showSetupNotice(message) {
       setupNotice.textContent = message;
@@ -881,15 +998,205 @@
 
     function showWorkspace(section) {
       const launches = section === "launches";
-      $("submissions-workspace").classList.toggle("hidden", launches);
+      const cremaScores = section === "crema-scores";
+      activeWorkspace = cremaScores ? "crema-scores" : launches ? "launches" : "submissions";
+      $("submissions-workspace").classList.toggle("hidden", cremaScores);
       $("launches-workspace").classList.toggle("hidden", !launches);
-      $("nav-submissions").classList.toggle("active", !launches);
+      $("crema-scores-workspace").classList.toggle("hidden", !cremaScores);
+      $("nav-submissions").classList.toggle("active", !launches && !cremaScores);
       $("nav-launches").classList.toggle("active", launches);
-      $("nav-submissions").toggleAttribute("aria-current", !launches);
+      $("nav-crema-scores").classList.toggle("active", cremaScores);
+      $("nav-submissions").toggleAttribute("aria-current", !launches && !cremaScores);
       $("nav-launches").toggleAttribute("aria-current", launches);
-      $("workspace-name").textContent = launches ? "Launch countdowns" : "Submissions";
-      $("refresh").classList.toggle("hidden", launches);
-      $("refresh-label").classList.toggle("hidden", launches);
+      $("nav-crema-scores").toggleAttribute("aria-current", cremaScores);
+      $("workspace-name").textContent = cremaScores ? "Crema Rush scores" : launches ? "Launch countdowns" : "Submissions";
+      $("refresh").classList.toggle("hidden", launches || cremaScores);
+      $("refresh-label").classList.toggle("hidden", launches || cremaScores);
+      if (cremaScores && cremaAuthorized) loadCremaScores();
+    }
+
+    let cremaAuthorized = false;
+
+    function showCremaNotice(message, isError = false) {
+      const notice = $("crema-scores-notice");
+      notice.textContent = message;
+      notice.classList.toggle("error", isError);
+      notice.classList.toggle("hidden", !message);
+    }
+
+    async function checkCremaAdminAccess(user) {
+      cremaAuthorized = false;
+      $("crema-scores-panel").classList.add("hidden");
+      $("crema-connect-panel").classList.remove("hidden");
+      if (!user || !cremaDb) return;
+      try {
+        const adminSnapshot = await getDoc(doc(cremaDb, "adminUsers", user.uid));
+        if (!adminSnapshot.exists() || adminSnapshot.data().enabled !== true) {
+          showCremaNotice(
+            `This game account is not authorized yet. In the carzzy-apps Firebase console, add adminUsers/${user.uid} with enabled set to true, then deploy the Crema Rush Firestore rules.`,
+            true
+          );
+          return;
+        }
+        cremaAuthorized = true;
+        $("crema-connect-panel").classList.add("hidden");
+        $("crema-scores-panel").classList.remove("hidden");
+        $("crema-admin-account").textContent = user.email || `Admin UID: ${user.uid}`;
+        showCremaNotice("");
+        if (activeWorkspace === "crema-scores") await loadCremaScores();
+      } catch (error) {
+        console.error("Unable to verify Crema Rush admin access.", error);
+        showCremaNotice(
+          error.code === "permission-denied"
+            ? "Firestore denied access. Deploy the updated root firestore.rules to the carzzy-apps project, then add this account to adminUsers."
+            : "Could not connect to Crema Rush. Check the game project's Firebase configuration and try again.",
+          true
+        );
+      }
+    }
+
+    async function loadCremaScores() {
+      if (!cremaAuthorized || !cremaDb) return;
+      const button = $("refresh-crema-scores");
+      button.disabled = true;
+      $("crema-score-count").textContent = "Loading scores…";
+      $("crema-score-rows").replaceChildren();
+      $("crema-score-empty").classList.add("hidden");
+      $("crema-score-message").textContent = "";
+      try {
+        const snapshot = await getDocs(query(
+          collection(cremaDb, "cremaRushProgress"),
+          orderBy("best", "desc"),
+          limit(100)
+        ));
+        const records = snapshot.docs.map((scoreDoc) => ({
+          id: scoreDoc.id,
+          data: scoreDoc.data(),
+          username: ""
+        }));
+        const playerIds = records.map((record) => record.id);
+        const usernameQueries = [];
+        for (let index = 0; index < playerIds.length; index += 30) {
+          usernameQueries.push(getDocs(query(
+            collection(cremaDb, "usernames"),
+            where("uid", "in", playerIds.slice(index, index + 30))
+          )));
+        }
+        const usernameSnapshots = await Promise.all(usernameQueries);
+        const usernamesByUid = new Map();
+        for (const usernames of usernameSnapshots) {
+          for (const usernameDoc of usernames.docs) {
+            usernamesByUid.set(usernameDoc.data().uid, usernameDoc.id);
+          }
+        }
+        cremaScores = records.map((record) => ({
+          ...record,
+          username: usernamesByUid.get(record.id) || "Player"
+        }));
+        renderCremaScores();
+        return true;
+      } catch (error) {
+        console.error("Unable to load Crema Rush scores.", error);
+        $("crema-score-count").textContent = "Scores could not be loaded.";
+        $("crema-score-message").textContent = error.code === "permission-denied"
+          ? "Firestore rules denied score access. Confirm this admin account is enabled in adminUsers and the current game rules are deployed."
+          : "Could not load scores. Check the connection and try again.";
+        $("crema-score-message").classList.add("error");
+        return false;
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    function renderCremaScores() {
+      const term = $("crema-score-search").value.trim().toLowerCase();
+      const records = cremaScores.filter((record) =>
+        `${record.username} ${record.id}`.toLowerCase().includes(term)
+      );
+      const rows = $("crema-score-rows");
+      rows.replaceChildren();
+      $("crema-score-empty").classList.toggle("hidden", records.length > 0);
+      $("crema-score-count").textContent = `${records.length} player${records.length === 1 ? "" : "s"}`;
+      for (const record of records) {
+        const row = document.createElement("tr");
+        const playerCell = document.createElement("td");
+        playerCell.className = "name-cell";
+        const playerName = document.createElement("div");
+        playerName.className = "submitter-name";
+        playerName.textContent = record.username;
+        const playerId = document.createElement("div");
+        playerId.className = "score-uid";
+        playerId.textContent = record.id;
+        playerCell.append(playerName, playerId);
+        row.append(playerCell);
+        for (const value of [record.data.best, record.data.lastScore, record.data.shifts]) {
+          const cell = document.createElement("td");
+          cell.textContent = Number.isSafeInteger(value) ? value.toLocaleString() : "—";
+          row.append(cell);
+        }
+        const actionCell = document.createElement("td");
+        const editButton = document.createElement("button");
+        editButton.type = "button";
+        editButton.className = "row-button";
+        editButton.dataset.editCremaScore = record.id;
+        editButton.textContent = "Edit best";
+        actionCell.append(editButton);
+        row.append(actionCell);
+        rows.append(row);
+      }
+    }
+
+    function openScoreEditor(record) {
+      editingCremaScore = record;
+      $("score-edit-player").textContent = `${record.username} · ${record.id}`;
+      $("score-edit-value").value = String(record.data.best);
+      $("score-edit-error").textContent = "";
+      $("score-edit-error").classList.add("hidden");
+      $("score-edit-backdrop").classList.remove("hidden");
+      $("score-edit-value").focus();
+      $("score-edit-value").select();
+    }
+
+    function closeScoreEditor() {
+      $("score-edit-backdrop").classList.add("hidden");
+      editingCremaScore = null;
+    }
+
+    async function saveCremaScore(event) {
+      event.preventDefault();
+      if (!cremaAuthorized || !editingCremaScore) return;
+      const score = Number($("score-edit-value").value);
+      if (!Number.isSafeInteger(score) || score < 0 || score > 2147483647) {
+        $("score-edit-error").textContent = "Enter a whole number between 0 and 2,147,483,647.";
+        $("score-edit-error").classList.remove("hidden");
+        return;
+      }
+      const saveButton = $("save-score-edit");
+      saveButton.disabled = true;
+      saveButton.textContent = "Saving…";
+      try {
+        await updateDoc(doc(cremaDb, "cremaRushProgress", editingCremaScore.id), {
+          best: score,
+          adminRevision: (Number.isSafeInteger(editingCremaScore.data.adminRevision)
+            ? editingCremaScore.data.adminRevision
+            : 0) + 1,
+          updatedAt: serverTimestamp()
+        });
+        closeScoreEditor();
+        if (await loadCremaScores()) {
+          $("crema-score-message").classList.remove("error");
+          $("crema-score-message").textContent = "Best score updated.";
+        }
+      } catch (error) {
+        console.error("Unable to update the Crema Rush best score.", error);
+        $("score-edit-error").textContent = error.code === "permission-denied"
+          ? "Firestore denied this edit. Confirm the admin account and score-edit rules are deployed."
+          : "Could not save this score. Check the connection and try again.";
+        $("score-edit-error").classList.remove("hidden");
+      } finally {
+        saveButton.disabled = false;
+        saveButton.textContent = "Save score";
+      }
     }
 
     function updateLaunchPreview() {
@@ -1244,9 +1551,62 @@
     }));
     $("nav-submissions").addEventListener("click", () => showWorkspace("submissions"));
     $("nav-launches").addEventListener("click", () => showWorkspace("launches"));
+    $("nav-crema-scores").addEventListener("click", () => showWorkspace("crema-scores"));
     $("refresh").addEventListener("click", loadSubmissions);
     $("refresh-launches").addEventListener("click", loadLaunchCountdowns);
     $("refresh-label").addEventListener("click", loadSubmissions);
+    $("refresh-crema-scores").addEventListener("click", loadCremaScores);
+    $("crema-score-search").addEventListener("input", renderCremaScores);
+    $("crema-score-rows").addEventListener("click", (event) => {
+      const button = event.target.closest("[data-edit-crema-score]");
+      if (!button) return;
+      const record = cremaScores.find((score) => score.id === button.dataset.editCremaScore);
+      if (record) openScoreEditor(record);
+    });
+    $("crema-connect-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!cremaAuth) {
+        showCremaNotice("Crema Rush authentication is not initialized. Reload the page and try again.", true);
+        return;
+      }
+      const button = $("crema-connect-button");
+      button.disabled = true;
+      button.textContent = "Connecting…";
+      const password = $("crema-password").value;
+      $("crema-password").value = "";
+      showCremaNotice("Signing in to the Crema Rush project…");
+      try {
+        await signInWithEmailAndPassword(
+          cremaAuth,
+          $("crema-email").value.trim(),
+          password
+        );
+      } catch (error) {
+        console.error("Crema Rush admin sign-in failed.", error);
+        showCremaNotice(error.code === "auth/invalid-credential"
+          ? "That Crema Rush email and password were not recognized."
+          : error.code === "auth/operation-not-allowed"
+            ? "Enable Email/Password sign-in in the carzzy-apps Firebase project."
+            : "Could not sign in to Crema Rush. Check the game project's Firebase Auth settings and try again.", true);
+      } finally {
+        button.disabled = false;
+        button.textContent = "Connect";
+      }
+    });
+    $("disconnect-crema").addEventListener("click", async () => {
+      try {
+        await signOut(cremaAuth);
+      } catch (error) {
+        console.error("Crema Rush admin sign-out failed.", error);
+        showCremaNotice("Could not disconnect from the Crema Rush project. Try again.", true);
+      }
+    });
+    $("score-edit-form").addEventListener("submit", saveCremaScore);
+    $("close-score-edit").addEventListener("click", closeScoreEditor);
+    $("cancel-score-edit").addEventListener("click", closeScoreEditor);
+    $("score-edit-backdrop").addEventListener("click", (event) => {
+      if (event.target === $("score-edit-backdrop")) closeScoreEditor();
+    });
     searchInput.addEventListener("input", renderRows);
     $("tabs").addEventListener("click", (event) => {
       const button = event.target.closest("[data-tab-id]");
@@ -1325,6 +1685,7 @@
       if (event.key === "Escape") $("detail-backdrop").classList.add("hidden");
       if (event.key === "Escape") $("add-tab-backdrop").classList.add("hidden");
       if (event.key === "Escape") closeLaunchEditor();
+      if (event.key === "Escape") closeScoreEditor();
     });
     $("create-launch").addEventListener("click", () => openLaunchEditor());
     $("close-launch-editor").addEventListener("click", closeLaunchEditor);
@@ -1363,6 +1724,27 @@
         console.error("Firebase authentication state failed.", error);
         showLogin("Authentication could not be initialized. Check your Firebase configuration.");
       });
+      try {
+        const cremaApp = initializeApp(cremaRushFirebaseConfig, "crema-rush-admin");
+        cremaAuth = getAuth(cremaApp);
+        cremaDb = getFirestore(cremaApp);
+        onAuthStateChanged(cremaAuth, (user) => {
+          cremaAuthorized = false;
+          if (!user) {
+            $("crema-connect-panel").classList.remove("hidden");
+            $("crema-scores-panel").classList.add("hidden");
+            showCremaNotice("");
+            return;
+          }
+          checkCremaAdminAccess(user);
+        }, (error) => {
+          console.error("Crema Rush authentication state failed.", error);
+          showCremaNotice("Could not initialize Crema Rush sign-in. Check the game Firebase configuration.", true);
+        });
+      } catch (error) {
+        console.error("Crema Rush Firebase initialization failed.", error);
+        showCremaNotice("Crema Rush could not be initialized. Check the game Firebase configuration.", true);
+      }
     } catch (error) {
       console.error("Firebase initialization failed.", error);
       $("setup-notice").textContent = "Firebase could not be initialized. Check the Firebase web app configuration.";
