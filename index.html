@@ -376,6 +376,10 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 19V5m0 14h17M8 15l4-4 3 2 6-7"/></svg>
           Crema Rush scores
         </button>
+        <button id="nav-rhythm-runner" class="nav-item" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 18h3l3-12 4 12 3-8 2 4h2"/></svg>
+          Rhythm Runner leaderboard
+        </button>
       </div>
       <div class="sidebar-bottom">
         <div class="secure-note">
@@ -551,6 +555,44 @@
           </section>
         </section>
       </section>
+      <section id="rhythm-runner-workspace" class="content workspace-view hidden" aria-labelledby="rhythm-runner-title">
+        <div id="rhythm-runner-notice" class="notice hidden" role="status"></div>
+        <section class="page-heading">
+          <div>
+            <div class="eyebrow">Game admin</div>
+            <h1 id="rhythm-runner-title">Rhythm Runner leaderboard</h1>
+            <p class="subtitle">Review and edit player names and best scores saved in Firebase.</p>
+          </div>
+        </section>
+        <section id="rhythm-runner-panel" class="hidden">
+          <div class="score-toolbar">
+            <div><h2>Leaderboard records</h2><p id="rhythm-runner-admin-account"></p></div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button id="refresh-rhythm-runner" class="text-button" type="button">Refresh leaderboard</button>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-heading">
+              <div><h2 class="panel-title">Player scores</h2><p class="panel-description">All records, highest score first.</p></div>
+              <label class="search-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg>
+                <input id="rhythm-runner-search" class="search-input" type="search" placeholder="Search username or player ID" aria-label="Search Rhythm Runner scores">
+              </label>
+            </div>
+            <div class="table-scroll">
+              <table class="score-table">
+                <thead><tr><th>Player</th><th>Best score</th><th>Last updated</th><th></th></tr></thead>
+                <tbody id="rhythm-runner-rows"></tbody>
+              </table>
+            </div>
+            <div id="rhythm-runner-empty" class="empty-state hidden">
+              <div><div class="empty-title">No scores found</div><p class="empty-copy">Scores appear after players finish a game.</p></div>
+            </div>
+            <div class="table-footer"><span id="rhythm-runner-count">Connect to load scores.</span><span>Saved in the carzzy-apps Firebase project</span></div>
+          </div>
+          <p id="rhythm-runner-message" class="score-message" role="status" aria-live="polite"></p>
+        </section>
+      </section>
     </main>
   </div>
 
@@ -571,6 +613,35 @@
         <div style="display:flex;justify-content:flex-end;gap:9px;margin-top:18px">
           <button id="cancel-score-edit" class="text-button" type="button">Cancel</button>
           <button id="save-score-edit" class="launch-primary" type="submit">Save score</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <div id="rhythm-runner-edit-backdrop" class="modal-backdrop hidden" role="presentation">
+    <section class="detail-modal" role="dialog" aria-modal="true" aria-labelledby="rhythm-runner-edit-title">
+      <div class="modal-head">
+        <div><h2 id="rhythm-runner-edit-title">Edit leaderboard entry</h2><p id="rhythm-runner-edit-player"></p></div>
+        <button id="close-rhythm-runner-edit" class="icon-button" type="button" aria-label="Close leaderboard editor">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m18 6-12 12M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <form id="rhythm-runner-edit-form" class="modal-body">
+        <div class="field">
+          <label for="rhythm-runner-edit-username">Username</label>
+          <div style="display:flex;gap:8px">
+            <input id="rhythm-runner-edit-username" type="text" minlength="2" maxlength="20" pattern="[A-Za-z0-9_]{2,20}" required>
+            <button id="generate-rhythm-runner-name" class="text-button" type="button">Generate random name</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="rhythm-runner-edit-score">Best score</label>
+          <input id="rhythm-runner-edit-score" class="score-input" type="number" min="0" max="2147483647" step="1" required>
+        </div>
+        <p id="rhythm-runner-edit-error" class="login-error hidden" role="alert"></p>
+        <div style="display:flex;justify-content:flex-end;gap:9px;margin-top:18px">
+          <button id="cancel-rhythm-runner-edit" class="text-button" type="button">Cancel</button>
+          <button id="save-rhythm-runner-edit" class="launch-primary" type="submit">Save entry</button>
         </div>
       </form>
     </section>
@@ -762,6 +833,8 @@
     let cremaDb;
     let cremaScores = [];
     let editingCremaScore = null;
+    let rhythmRunnerScores = [];
+    let editingRhythmRunnerScore = null;
 
     function showSetupNotice(message) {
       setupNotice.textContent = message;
@@ -985,20 +1058,25 @@
     function showWorkspace(section) {
       const launches = section === "launches";
       const cremaScores = section === "crema-scores";
-      activeWorkspace = cremaScores ? "crema-scores" : launches ? "launches" : "submissions";
-      $("submissions-workspace").classList.toggle("hidden", cremaScores);
+      const rhythmRunner = section === "rhythm-runner";
+      activeWorkspace = cremaScores ? "crema-scores" : rhythmRunner ? "rhythm-runner" : launches ? "launches" : "submissions";
+      $("submissions-workspace").classList.toggle("hidden", launches || cremaScores || rhythmRunner);
       $("launches-workspace").classList.toggle("hidden", !launches);
       $("crema-scores-workspace").classList.toggle("hidden", !cremaScores);
-      $("nav-submissions").classList.toggle("active", !launches && !cremaScores);
+      $("rhythm-runner-workspace").classList.toggle("hidden", !rhythmRunner);
+      $("nav-submissions").classList.toggle("active", !launches && !cremaScores && !rhythmRunner);
       $("nav-launches").classList.toggle("active", launches);
       $("nav-crema-scores").classList.toggle("active", cremaScores);
-      $("nav-submissions").toggleAttribute("aria-current", !launches && !cremaScores);
+      $("nav-rhythm-runner").classList.toggle("active", rhythmRunner);
+      $("nav-submissions").toggleAttribute("aria-current", !launches && !cremaScores && !rhythmRunner);
       $("nav-launches").toggleAttribute("aria-current", launches);
       $("nav-crema-scores").toggleAttribute("aria-current", cremaScores);
-      $("workspace-name").textContent = cremaScores ? "Crema Rush scores" : launches ? "Launch countdowns" : "Submissions";
-      $("refresh").classList.toggle("hidden", launches || cremaScores);
-      $("refresh-label").classList.toggle("hidden", launches || cremaScores);
+      $("nav-rhythm-runner").toggleAttribute("aria-current", rhythmRunner);
+      $("workspace-name").textContent = cremaScores ? "Crema Rush scores" : rhythmRunner ? "Rhythm Runner leaderboard" : launches ? "Launch countdowns" : "Submissions";
+      $("refresh").classList.toggle("hidden", launches || cremaScores || rhythmRunner);
+      $("refresh-label").classList.toggle("hidden", launches || cremaScores || rhythmRunner);
       if (cremaScores && cremaAuthorized) loadCremaScores();
+      if (rhythmRunner && cremaAuthorized) loadRhythmRunnerScores();
     }
 
     let cremaAuthorized = false;
@@ -1010,39 +1088,53 @@
       notice.classList.toggle("hidden", !message);
     }
 
+    function showRhythmRunnerNotice(message, isError = false) {
+      const notice = $("rhythm-runner-notice");
+      notice.textContent = message;
+      notice.classList.toggle("error", isError);
+      notice.classList.toggle("hidden", !message);
+    }
+
     async function checkCremaAdminAccess(user) {
       cremaAuthorized = false;
       $("crema-scores-panel").classList.add("hidden");
+      $("rhythm-runner-panel").classList.add("hidden");
       if (!user || !cremaDb) {
-        showCremaNotice("Sign out and sign back in with your admin account to enable score editing.");
+        const message = "Sign out and sign back in with your admin account to enable score editing.";
+        showCremaNotice(message);
+        showRhythmRunnerNotice(message);
         return;
       }
       if (!auth.currentUser || auth.currentUser.email?.toLowerCase() !== user.email?.toLowerCase()) {
-        showCremaNotice("The game project is signed in as a different account. Sign out and sign back in with the same admin email and password.");
+        const message = "The game project is signed in as a different account. Sign out and sign back in with the same admin email and password.";
+        showCremaNotice(message);
+        showRhythmRunnerNotice(message);
         return;
       }
       try {
         const adminSnapshot = await getDoc(doc(cremaDb, "adminUsers", user.uid));
         if (!adminSnapshot.exists() || adminSnapshot.data().enabled !== true) {
-          showCremaNotice(
-            `Your admin account needs score-edit access. In the carzzy-apps Firebase console, allowlist this account's game-project UID (adminUsers/${user.uid}) with enabled set to true, then deploy the Crema Rush Firestore rules.`,
-            true
-          );
+          const message = `Your admin account needs score-edit access. In the carzzy-apps Firebase console, allowlist this account's game-project UID (adminUsers/${user.uid}) with enabled set to true, then deploy the root Firestore rules.`;
+          showCremaNotice(message, true);
+          showRhythmRunnerNotice(message, true);
           return;
         }
         cremaAuthorized = true;
         $("crema-scores-panel").classList.remove("hidden");
+        $("rhythm-runner-panel").classList.remove("hidden");
         $("crema-admin-account").textContent = user.email || `Admin UID: ${user.uid}`;
+        $("rhythm-runner-admin-account").textContent = user.email || `Admin UID: ${user.uid}`;
         showCremaNotice("");
+        showRhythmRunnerNotice("");
         if (activeWorkspace === "crema-scores") await loadCremaScores();
+        if (activeWorkspace === "rhythm-runner") await loadRhythmRunnerScores();
       } catch (error) {
         console.error("Unable to verify Crema Rush admin access.", error);
-        showCremaNotice(
-          error.code === "permission-denied"
-            ? "Firestore denied access. Deploy the updated root firestore.rules to the carzzy-apps project, then allowlist this admin account."
-            : "Could not connect to Crema Rush. Check the game project's Firebase configuration and try again.",
-          true
-        );
+        const message = error.code === "permission-denied"
+          ? "Firestore denied access. Deploy the updated root firestore.rules to the carzzy-apps project, then allowlist this admin account."
+          : "Could not connect to the game Firebase project. Check its configuration and try again.";
+        showCremaNotice(message, true);
+        showRhythmRunnerNotice(message, true);
       }
     }
 
@@ -1314,6 +1406,172 @@
       } finally {
         saveButton.disabled = false;
         saveButton.textContent = "Save score";
+      }
+    }
+
+    const rhythmRunnerNameAdjectives = ["Neon", "Turbo", "Pixel", "Cosmic", "Lucky", "Rapid", "Sunny", "Silent"];
+    const rhythmRunnerNameAnimals = ["Panda", "Otter", "Falcon", "Tiger", "Comet", "Koala", "Raven", "Gecko"];
+
+    function randomRhythmRunnerName() {
+      const values = crypto.getRandomValues(new Uint32Array(3));
+      const adjective = rhythmRunnerNameAdjectives[values[0] % rhythmRunnerNameAdjectives.length];
+      const animal = rhythmRunnerNameAnimals[values[1] % rhythmRunnerNameAnimals.length];
+      return `${adjective}${animal}${String(values[2] % 100000).padStart(5, "0")}`;
+    }
+
+    async function loadRhythmRunnerScores() {
+      if (!cremaAuthorized || !cremaDb) return;
+      const button = $("refresh-rhythm-runner");
+      button.disabled = true;
+      $("rhythm-runner-count").textContent = "Loading leaderboard…";
+      $("rhythm-runner-rows").replaceChildren();
+      $("rhythm-runner-empty").classList.add("hidden");
+      $("rhythm-runner-message").textContent = "";
+      try {
+        const snapshot = await getDocs(query(
+          collection(cremaDb, "rhythmRunnerScores"),
+          orderBy("score", "desc")
+        ));
+        rhythmRunnerScores = snapshot.docs.map((scoreDoc) => ({
+          id: scoreDoc.id,
+          data: scoreDoc.data()
+        }));
+        renderRhythmRunnerScores();
+        return true;
+      } catch (error) {
+        console.error("Unable to load Rhythm Runner scores.", error);
+        $("rhythm-runner-count").textContent = "Leaderboard could not be loaded.";
+        $("rhythm-runner-message").textContent = error.code === "permission-denied"
+          ? "Firestore denied access. Confirm the admin account is allowlisted and the root firestore.rules are deployed."
+          : "Could not load scores. Check the connection and try again.";
+        $("rhythm-runner-message").classList.add("error");
+        return false;
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    function renderRhythmRunnerScores() {
+      const term = $("rhythm-runner-search").value.trim().toLowerCase();
+      const records = rhythmRunnerScores.filter(({ id, data }) =>
+        `${data.username || ""} ${id}`.toLowerCase().includes(term)
+      );
+      const rows = $("rhythm-runner-rows");
+      rows.replaceChildren();
+      $("rhythm-runner-empty").classList.toggle("hidden", records.length > 0);
+      $("rhythm-runner-count").textContent = `${records.length} record${records.length === 1 ? "" : "s"}`;
+      for (const record of records) {
+        const row = document.createElement("tr");
+        const playerCell = document.createElement("td");
+        playerCell.className = "name-cell";
+        const playerName = document.createElement("div");
+        playerName.className = "submitter-name";
+        playerName.textContent = record.data.username || "Player";
+        const playerId = document.createElement("div");
+        playerId.className = "score-uid";
+        playerId.textContent = record.id;
+        playerCell.append(playerName, playerId);
+        row.append(playerCell);
+
+        const scoreCell = document.createElement("td");
+        scoreCell.textContent = Number.isSafeInteger(record.data.score)
+          ? record.data.score.toLocaleString()
+          : "—";
+        row.append(scoreCell);
+
+        const updatedCell = document.createElement("td");
+        updatedCell.textContent = formatDateTime(submissionDate({ updatedAt: record.data.updatedAt }));
+        row.append(updatedCell);
+
+        const actionCell = document.createElement("td");
+        const editButton = document.createElement("button");
+        editButton.type = "button";
+        editButton.className = "row-button";
+        editButton.dataset.editRhythmRunnerScore = record.id;
+        editButton.textContent = "Edit";
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "row-button";
+        deleteButton.dataset.deleteRhythmRunnerScore = record.id;
+        deleteButton.textContent = "Delete";
+        actionCell.append(editButton, deleteButton);
+        row.append(actionCell);
+        rows.append(row);
+      }
+    }
+
+    function openRhythmRunnerScoreEditor(record) {
+      editingRhythmRunnerScore = record;
+      $("rhythm-runner-edit-player").textContent = `Player ID: ${record.id}`;
+      $("rhythm-runner-edit-username").value = record.data.username || "";
+      $("rhythm-runner-edit-score").value = String(record.data.score || 0);
+      $("rhythm-runner-edit-error").textContent = "";
+      $("rhythm-runner-edit-error").classList.add("hidden");
+      $("rhythm-runner-edit-backdrop").classList.remove("hidden");
+      $("rhythm-runner-edit-username").focus();
+    }
+
+    function closeRhythmRunnerScoreEditor() {
+      $("rhythm-runner-edit-backdrop").classList.add("hidden");
+      editingRhythmRunnerScore = null;
+    }
+
+    async function saveRhythmRunnerScore(event) {
+      event.preventDefault();
+      if (!cremaAuthorized || !editingRhythmRunnerScore) return;
+      const username = $("rhythm-runner-edit-username").value.trim();
+      const score = Number($("rhythm-runner-edit-score").value);
+      if (!/^[A-Za-z0-9_]{2,20}$/.test(username)) {
+        $("rhythm-runner-edit-error").textContent = "Use 2–20 letters, numbers, or underscores for the username.";
+        $("rhythm-runner-edit-error").classList.remove("hidden");
+        return;
+      }
+      if (!Number.isSafeInteger(score) || score < 0 || score > 2147483647) {
+        $("rhythm-runner-edit-error").textContent = "Enter a whole number between 0 and 2,147,483,647.";
+        $("rhythm-runner-edit-error").classList.remove("hidden");
+        return;
+      }
+
+      const saveButton = $("save-rhythm-runner-edit");
+      saveButton.disabled = true;
+      saveButton.textContent = "Saving…";
+      try {
+        await updateDoc(doc(cremaDb, "rhythmRunnerScores", editingRhythmRunnerScore.id), {
+          username,
+          score,
+          updatedAt: serverTimestamp()
+        });
+        closeRhythmRunnerScoreEditor();
+        if (await loadRhythmRunnerScores()) {
+          $("rhythm-runner-message").classList.remove("error");
+          $("rhythm-runner-message").textContent = `Saved ${username}'s leaderboard entry.`;
+        }
+      } catch (error) {
+        console.error("Unable to update the Rhythm Runner leaderboard entry.", error);
+        $("rhythm-runner-edit-error").textContent = error.code === "permission-denied"
+          ? "Firestore denied this edit. Confirm the admin account and root Firestore rules."
+          : "Could not save this entry. Check the connection and try again.";
+        $("rhythm-runner-edit-error").classList.remove("hidden");
+      } finally {
+        saveButton.disabled = false;
+        saveButton.textContent = "Save entry";
+      }
+    }
+
+    async function deleteRhythmRunnerScore(playerId) {
+      if (!cremaAuthorized || !confirm("Delete this Rhythm Runner leaderboard entry? This cannot be undone.")) return;
+      try {
+        await deleteDoc(doc(cremaDb, "rhythmRunnerScores", playerId));
+        if (await loadRhythmRunnerScores()) {
+          $("rhythm-runner-message").classList.remove("error");
+          $("rhythm-runner-message").textContent = "Leaderboard entry deleted.";
+        }
+      } catch (error) {
+        console.error("Unable to delete the Rhythm Runner leaderboard entry.", error);
+        $("rhythm-runner-message").textContent = error.code === "permission-denied"
+          ? "Firestore denied this deletion. Confirm the admin account and root Firestore rules."
+          : "Could not delete this entry. Check the connection and try again.";
+        $("rhythm-runner-message").classList.add("error");
       }
     }
 
@@ -1678,10 +1936,33 @@
     $("nav-submissions").addEventListener("click", () => showWorkspace("submissions"));
     $("nav-launches").addEventListener("click", () => showWorkspace("launches"));
     $("nav-crema-scores").addEventListener("click", () => showWorkspace("crema-scores"));
+    $("nav-rhythm-runner").addEventListener("click", () => showWorkspace("rhythm-runner"));
     $("refresh").addEventListener("click", loadSubmissions);
     $("refresh-launches").addEventListener("click", loadLaunchCountdowns);
     $("refresh-label").addEventListener("click", loadSubmissions);
     $("refresh-crema-scores").addEventListener("click", loadCremaScores);
+    $("refresh-rhythm-runner").addEventListener("click", loadRhythmRunnerScores);
+    $("rhythm-runner-search").addEventListener("input", renderRhythmRunnerScores);
+    $("rhythm-runner-rows").addEventListener("click", (event) => {
+      const editButton = event.target.closest("[data-edit-rhythm-runner-score]");
+      if (editButton) {
+        const record = rhythmRunnerScores.find((score) => score.id === editButton.dataset.editRhythmRunnerScore);
+        if (record) openRhythmRunnerScoreEditor(record);
+        return;
+      }
+      const deleteButton = event.target.closest("[data-delete-rhythm-runner-score]");
+      if (deleteButton) deleteRhythmRunnerScore(deleteButton.dataset.deleteRhythmRunnerScore);
+    });
+    $("rhythm-runner-edit-form").addEventListener("submit", saveRhythmRunnerScore);
+    $("generate-rhythm-runner-name").addEventListener("click", () => {
+      $("rhythm-runner-edit-username").value = randomRhythmRunnerName();
+      $("rhythm-runner-edit-username").focus();
+    });
+    $("close-rhythm-runner-edit").addEventListener("click", closeRhythmRunnerScoreEditor);
+    $("cancel-rhythm-runner-edit").addEventListener("click", closeRhythmRunnerScoreEditor);
+    $("rhythm-runner-edit-backdrop").addEventListener("click", (event) => {
+      if (event.target === $("rhythm-runner-edit-backdrop")) closeRhythmRunnerScoreEditor();
+    });
     $("crema-score-search").addEventListener("input", renderCremaScores);
     $("crema-score-rows").addEventListener("click", (event) => {
       const button = event.target.closest("[data-edit-crema-score]");
